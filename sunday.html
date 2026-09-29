@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eaf4ed">
+  <title>Hizbul-Azam — Sunday</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="day-page">
+  <aside class="sidebar" aria-label="Daily portions">
+    <a class="home-link" href="index.html">← Home</a>
+    <div class="sidebar-days">
+      <a href="saturday.html">Saturday</a>
+<a href="sunday.html">Sunday</a>
+<a href="monday.html">Monday</a>
+<a href="tuesday.html">Tuesday</a>
+<a href="wednesday.html">Wednesday</a>
+<a href="thursday.html">Thursday</a>
+<a href="friday.html">Friday</a>
+    </div>
+  </aside>
+
+  <main class="reader">
+    <header class="reader-header">
+      <a class="mobile-home" href="index.html">← Home</a>
+      <h1>Sunday</h1>
+      <select class="day-select" aria-label="Choose a day" onchange="if(this.value) window.location.href=this.value">
+        <option value="">Go to day…</option>
+        <option value="saturday.html" >Saturday</option><option value="sunday.html" selected>Sunday</option><option value="monday.html" >Monday</option><option value="tuesday.html" >Tuesday</option><option value="wednesday.html" >Wednesday</option><option value="thursday.html" >Thursday</option><option value="friday.html" >Friday</option>
+      </select>
+    </header>
+
+    <section class="pdf-wrap" aria-label="Sunday Hizbul-Azam">
+      <iframe
+        src="pdfs/sunday.pdf"
+        title="Sunday Hizbul-Azam PDF"
+        loading="eager">
+      </iframe>
+      <p class="pdf-fallback">
+        If the PDF does not display, <a href="pdfs/sunday.pdf">open the PDF directly</a>.
+      </p>
+    </section>
+  </main>
+
+  <footer class="audio-bar">
+    <div class="audio-label">
+      <strong>Sunday</strong>
+      <span>Hizbul-Azam</span>
+    </div>
+    <audio controls preload="metadata" src="audio/sunday.mp3">
+      Your browser does not support audio playback.
+    </audio>
+  </footer>
+</body>
+</html>

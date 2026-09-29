@@ -1,0 +1,7 @@
+Saturday: pdfs/saturday.pdf + audio/saturday.mp3 (PDF pages 13–48)
+Sunday: pdfs/sunday.pdf + audio/sunday.mp3 (PDF pages 49–68)
+Monday: pdfs/monday.pdf + audio/monday.mp3 (PDF pages 69–92)
+Tuesday: pdfs/tuesday.pdf + audio/tuesday.mp3 (PDF pages 93–116)
+Wednesday: pdfs/wednesday.pdf + audio/wednesday.mp3 (PDF pages 117–139)
+Thursday: pdfs/thursday.pdf + audio/thursday.mp3 (PDF pages 141–164)
+Friday: pdfs/friday.pdf + audio/friday.mp3 (PDF pages 165–197)
