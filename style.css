@@ -368,6 +368,7 @@ audio {
 
 .reader {
   min-width: 0;
+  padding-bottom: 18px;
 }
 
 .reader-header {
@@ -376,7 +377,7 @@ audio {
   justify-content: space-between;
   gap: 12px;
   max-width: 800px;
-  margin: 0 auto 6px;
+  margin: 0 auto 8px;
 }
 
 .reader-title {
@@ -399,7 +400,7 @@ audio {
   width: min(800px, 100%);
   height: 2px;
   overflow: hidden;
-  margin: 0 auto 18px;
+  margin: 0 auto 20px;
   border-radius: 99px;
   background: #e3dfd3;
 }
@@ -462,7 +463,7 @@ audio {
   align-items: center;
   gap: 10px;
   width: min(800px, 100%);
-  margin: 8px auto 0;
+  margin: 14px auto 0;
 }
 
 .day-action {
@@ -579,7 +580,7 @@ audio {
     display: flex;
     gap: 4px;
     overflow-x: auto;
-    margin: 0 -1px 9px;
+    margin: 0 -1px 15px;
     padding: 3px;
     border-radius: 7px;
     scrollbar-width: none;
@@ -598,13 +599,15 @@ audio {
     font-size: .77rem;
   }
 
-  .reader-header { margin-bottom: 5px; padding: 0 2px; }
+  .reader-header { margin-bottom: 6px; padding: 0 2px; }
   .reader-title { font-size: .98rem; }
   .reader-help { font-size: .7rem; }
 
-  .reading-progress { margin-bottom: 11px; }
+  .reading-progress { margin-bottom: 13px; }
 
   .pdf-viewer { padding-bottom: 2px; }
+
+  .reader { padding-bottom: 10px; }
   .pdf-page-wrap {
     width: 100%;
     margin-bottom: 11px;
@@ -614,7 +617,7 @@ audio {
   .day-actions {
     grid-template-columns: 1fr 1fr;
     width: 100%;
-    margin: 10px 0 0;
+    margin: 14px 0 0;
   }
 
   .day-action.home-action,
