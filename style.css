@@ -665,7 +665,9 @@ audio {
 
 .player audio { display: block; width: 100%; min-width: 0; }
 
-.audio-extra { display: flex; align-items: center; }
+.audio-extra { display: flex; align-items: center; order: 3; margin-left: auto; }
+.player audio { order: 2; }
+.player-title { order: 1; }
 .speed-control {
   min-width: 42px;
   height: 30px;
@@ -812,7 +814,8 @@ audio {
   }
   .player-title { display: none; }
   .player audio { width: 100%; flex: 1 1 auto; min-width: 0; }
-  .audio-extra { flex: 0 0 auto; }
+  .audio-extra { flex: 0 0 auto; margin-left: auto; order: 3; }
+  .player audio { order: 2; }
   .speed-control {
     min-width: 37px;
     height: 30px;

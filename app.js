@@ -154,7 +154,7 @@
     function setState(text, done) {
       if (status) status.textContent = text;
       if (done) {
-        button.textContent = 'Saved offline';
+        button.hidden = true;
         button.disabled = true;
         button.classList.add('saved');
       }
