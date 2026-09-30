@@ -6,16 +6,34 @@
   <meta name="theme-color" content="#f7f4ec">
   <title>Hizbul-Azam</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <script src="app.js" defer></script>
 </head>
 <body>
   <main class="home">
     <header class="home-header">
       <div class="home-mark" aria-hidden="true"></div>
-      <h1>Hizbul-Azam</h1>
-      <p class="home-arabic" lang="ar" dir="rtl">الحزب الأعظم</p>
+      <h1 class="home-arabic home-title" lang="ar" dir="rtl">الحزب الأعظم</h1>
+      <p class="home-english">Hizbul-Azam</p>
       <p class="subtitle">Daily reading and listening, arranged by portion.</p>
       <div class="ornament" aria-hidden="true"><span class="ornament-mark"></span></div>
     </header>
+
+    <section class="home-tools" aria-label="Quick access" hidden id="continue-card">
+      <a class="continue-card" data-continue-link href="saturday.html">
+        <span class="continue-label" data-continue-label>Continue your reading</span>
+        <span class="continue-arrow" aria-hidden="true">→</span>
+      </a>
+    </section>
+
+    <section class="install-card" id="install-card" hidden>
+      <div>
+        <strong>Keep Hizbul-Azam close</strong>
+        <span>Add it to your device for a more app-like experience.</span>
+      </div>
+      <button id="install-button" type="button">Install</button>
+    </section>
 
     <nav class="day-grid" aria-label="Daily portions">
       <a class="day-tile" href="saturday.html">

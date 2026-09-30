@@ -1,25 +1,21 @@
-# Hizbul-Azam — website package v5
+# Hizbul-Azam — updated web files
 
-## Included
-- Refined responsive website
-- 7 rebuilt PDFs with deep botanical green accents replacing the source magenta
-- 7 audio files with the final 20 seconds removed
-- PDF.js in-page reader
+This package adds the next UX improvements in the agreed order:
 
-## PDF source-page mapping
-- Saturday: 13–37
-- Sunday: 49, 37–48, 51–63
-- Monday: 69, 63–68, 71–88
-- Tuesday: 93, 88–92, 95–116
-- Wednesday: 117, 119–139
-- Thursday: 141, 143–164
-- Friday: 165–197
+1. Installable PWA / Add to Home Screen
+2. Offline support with per-day offline saving
+3. Remembers last PDF page and audio position
+4. Compact 1× / 1.5× / 2× playback-speed control
+5. Focus / full-screen reading mode
+6. Desktop-only PDF zoom controls
 
-The page numbers above refer to the original 224-page source PDF.
+## GitHub Pages
 
-## UX refinements
-- Cleaner mobile separation between the horizontal day navigation and reader heading
-- Desktop PDF reading width reduced slightly for a more book-like presentation
-- Mobile PDF remains full-width
-- Persistent audio player remains minimal on mobile and green on desktop
-- Homepage tiles show only day, number and portion (no “Read & listen”)
+Upload/replace these files in the repository root. Keep the existing `pdfs/` and `audio/` folders in place.
+
+The package expects:
+
+- `pdfs/saturday.pdf` through `pdfs/friday.pdf`
+- `audio/saturday.mp3` through `audio/friday.mp3`
+
+The new offline feature does **not** automatically download all seven large audio files. On each day, use **Save offline** to save that day's PDF and audio for offline use.

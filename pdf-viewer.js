@@ -3,16 +3,20 @@
   if (!viewer) return;
 
   const pdfUrl = viewer.dataset.pdf;
+  const day = viewer.dataset.day || '';
   const status = document.getElementById('pdf-status');
   const fallback = document.getElementById('pdf-fallback');
   const currentPage = document.getElementById('current-page');
   const totalPages = document.getElementById('total-pages');
   const progressBar = document.getElementById('reading-progress');
+  const zoomLevel = document.getElementById('zoom-level');
 
   let pdf;
   let pages = [];
   let firstPage;
   let resizeTimer;
+  let zoom = 1;
+  let restoring = true;
 
   function showError() {
     if (status) {
@@ -22,10 +26,21 @@
     if (fallback) fallback.hidden = false;
   }
 
+  function savePage(pageNumber) {
+    if (window.HizbulAzam && window.HizbulAzam.saveLastPosition) {
+      window.HizbulAzam.saveLastPosition(day, pageNumber);
+    }
+  }
+
   function updateProgress(pageNumber, total) {
     if (currentPage) currentPage.textContent = pageNumber;
     if (totalPages) totalPages.textContent = total;
     if (progressBar) progressBar.style.width = ((pageNumber / total) * 100) + '%';
+    if (!restoring) savePage(pageNumber);
+  }
+
+  function updateZoomLabel() {
+    if (zoomLevel) zoomLevel.textContent = Math.round(zoom * 100) + '%';
   }
 
   async function renderPage(wrap) {
@@ -37,7 +52,7 @@
     try {
       const page = number === 1 ? firstPage : await pdf.getPage(number);
       const base = page.getViewport({ scale: 1 });
-      const width = Math.max(240, wrap.clientWidth);
+      const width = Math.max(240, wrap.clientWidth * zoom);
       const scale = width / base.width;
       const viewport = page.getViewport({ scale });
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -66,7 +81,7 @@
     }
   }
 
-  function rerenderVisiblePages() {
+  function rerenderRenderedPages() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       pages.forEach((wrap) => {
@@ -75,7 +90,35 @@
         delete wrap.dataset.rendered;
         renderPage(wrap);
       });
-    }, 180);
+    }, 160);
+  }
+
+  function setZoom(next) {
+    zoom = Math.max(0.75, Math.min(2, Number(next.toFixed(2))));
+    updateZoomLabel();
+    rerenderRenderedPages();
+  }
+
+  function setupPdfControls() {
+    const controls = document.getElementById('pdf-controls');
+    if (!controls) return;
+    controls.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-pdf-action]');
+      if (!button) return;
+      const action = button.dataset.pdfAction;
+      if (action === 'zoom-out') setZoom(zoom - 0.1);
+      if (action === 'zoom-in') setZoom(zoom + 0.1);
+      if (action === 'fit') setZoom(1);
+    });
+    updateZoomLabel();
+  }
+
+  function getSavedPage() {
+    try {
+      const data = JSON.parse(localStorage.getItem('hizbulAzam:lastPosition') || 'null');
+      if (!data || data.day !== day) return 1;
+      return Math.max(1, Number(data.page) || 1);
+    } catch (_) { return 1; }
   }
 
   const script = document.createElement('script');
@@ -94,7 +137,6 @@
 
       firstPage = await pdf.getPage(1);
       const firstViewport = firstPage.getViewport({ scale: 1 });
-
       const fragment = document.createDocumentFragment();
 
       for (let number = 1; number <= total; number++) {
@@ -115,8 +157,6 @@
 
       viewer.appendChild(fragment);
 
-      // Render pages shortly before they enter the viewport. This keeps long portions
-      // lightweight while preserving normal browser scrolling on desktop and mobile.
       const renderObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) renderPage(entry.target);
@@ -133,6 +173,7 @@
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             updateProgress(Number(entry.target.dataset.page), total);
+            restoring = false;
           }
         });
       }, {
@@ -143,14 +184,26 @@
 
       pages.forEach((page) => progressObserver.observe(page));
 
-      // Render the first page immediately so the reader never feels empty.
+      setupPdfControls();
       await renderPage(pages[0]);
 
+      const savedPage = getSavedPage();
+      if (savedPage > 1 && savedPage <= total) {
+        requestAnimationFrame(() => {
+          pages[savedPage - 1].scrollIntoView({ block: 'start', behavior: 'auto' });
+          updateProgress(savedPage, total);
+          restoring = false;
+        });
+      } else {
+        restoring = false;
+        savePage(1);
+      }
+
       if ('ResizeObserver' in window) {
-        const resizeObserver = new ResizeObserver(rerenderVisiblePages);
+        const resizeObserver = new ResizeObserver(rerenderRenderedPages);
         resizeObserver.observe(viewer);
       } else {
-        window.addEventListener('resize', rerenderVisiblePages, { passive: true });
+        window.addEventListener('resize', rerenderRenderedPages, { passive: true });
       }
     } catch (error) {
       console.error(error);

@@ -55,6 +55,10 @@ a {
   color: inherit;
 }
 
+[hidden] { display: none !important; }
+
+button { cursor: pointer; }
+
 button,
 audio {
   font: inherit;
@@ -139,12 +143,25 @@ audio {
 }
 
 .home-arabic {
-  margin: 9px 0 2px;
   color: var(--green-900);
   direction: rtl;
   font-family: "Noto Naskh Arabic", "Amiri", "Times New Roman", serif;
-  font-size: clamp(1.35rem, 3vw, 1.65rem);
-  line-height: 1.5;
+  line-height: 1.45;
+}
+
+.home-title {
+  margin: 0 0 2px;
+  font-size: clamp(2.25rem, 5vw, 3.15rem);
+}
+
+.home-english {
+  margin: 0;
+  color: var(--green-900);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.55rem, 3.5vw, 2.15rem);
+  font-weight: 500;
+  letter-spacing: -.025em;
+  line-height: 1.2;
 }
 
 .home .subtitle {
@@ -156,6 +173,57 @@ audio {
 
 .home .ornament {
   margin-top: 18px;
+}
+
+/* Quick-access cards */
+.home-tools {
+  width: min(560px, 100%);
+  margin: 0 auto 12px;
+}
+
+.continue-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 15px;
+  border: 1px solid var(--line-green);
+  border-radius: 7px;
+  background: rgba(241,245,241,.72);
+  color: var(--green-800);
+  text-decoration: none;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.continue-arrow { color: var(--gold); font-size: 1rem; }
+
+.install-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: min(560px, 100%);
+  margin: 0 auto 15px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255,253,248,.72);
+}
+
+.install-card strong,
+.install-card span { display: block; }
+.install-card strong { color: var(--green-900); font-family: Georgia, serif; font-size: .82rem; font-weight: 500; }
+.install-card span { margin-top: 2px; color: var(--muted); font-size: .69rem; }
+.install-card button {
+  flex: 0 0 auto;
+  border: 1px solid var(--green-900);
+  border-radius: 5px;
+  padding: 7px 11px;
+  background: var(--green-900);
+  color: #fffdf8;
+  font-size: .72rem;
+  font-weight: 600;
 }
 
 .day-grid {
@@ -372,13 +440,34 @@ audio {
 }
 
 .reader-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
   gap: 12px;
-  max-width: 780px;
+  max-width: 800px;
   margin: 0 auto 8px;
 }
+
+.reader-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reader-tool {
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(255,253,248,.72);
+  color: var(--green-700);
+  font-size: .68rem;
+  font-weight: 600;
+}
+
+.reader-tool:hover { border-color: var(--gold-soft); color: var(--green-950); }
+.reader-tool.saved { color: var(--green-900); border-color: var(--line-green); background: var(--green-50); }
+
 
 .reader-title {
   margin: 0;
@@ -397,7 +486,7 @@ audio {
 
 .reading-progress {
   position: relative;
-  width: min(780px, 100%);
+  width: min(800px, 100%);
   height: 2px;
   overflow: hidden;
   margin: 0 auto 20px;
@@ -417,6 +506,40 @@ audio {
 /* The reader now uses the normal page scrollbar rather than a nested scrolling box.
    This is substantially more natural on desktop and prevents the PDF from feeling
    like an embedded document viewer. */
+.pdf-toolbar {
+  width: min(800px, 100%);
+  min-height: 34px;
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.pdf-toolbar-label {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: .67rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.pdf-tool {
+  min-width: 30px;
+  height: 29px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(255,253,248,.78);
+  color: var(--green-700);
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.pdf-tool:hover { border-color: var(--gold-soft); color: var(--green-950); }
+.pdf-fit { min-width: 66px; }
+.zoom-level { min-width: 43px; color: var(--muted); font-size: .68rem; text-align: center; }
+
 .pdf-viewer {
   width: 100%;
   padding: 0 0 6px;
@@ -424,9 +547,10 @@ audio {
 
 .pdf-page-wrap {
   position: relative;
-  width: min(780px, 100%);
+  width: min(800px, 100%);
   margin: 0 auto 22px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   background: #fff;
   border: 1px solid rgba(217,213,200,.9);
   box-shadow: 0 5px 20px rgba(20,40,28,.10);
@@ -449,7 +573,7 @@ audio {
 }
 
 .pdf-fallback {
-  width: min(780px, 100%);
+  width: min(800px, 100%);
   margin: 10px auto;
   color: var(--muted);
   font-size: .82rem;
@@ -457,12 +581,20 @@ audio {
 
 .pdf-fallback a { color: var(--green-700); }
 
+.offline-status {
+  width: min(800px, 100%);
+  min-height: 0;
+  margin: 5px auto 0;
+  color: var(--muted);
+  font-size: .67rem;
+}
+
 .day-actions {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 10px;
-  width: min(780px, 100%);
+  width: min(800px, 100%);
   margin: 14px auto 0;
 }
 
@@ -508,7 +640,7 @@ audio {
 
 .player-inner {
   display: grid;
-  grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
+  grid-template-columns: minmax(150px, 190px) minmax(0, 1fr) auto;
   align-items: center;
   gap: 20px;
   max-width: 1320px;
@@ -533,6 +665,31 @@ audio {
 
 .player audio { display: block; width: 100%; min-width: 0; }
 
+.audio-extra { display: flex; align-items: center; }
+.speed-control {
+  min-width: 42px;
+  height: 30px;
+  border: 1px solid rgba(215,197,150,.55);
+  border-radius: 5px;
+  background: transparent;
+  color: #fffdf8;
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.focus-mode .topbar,
+.focus-mode .sidebar,
+.focus-mode .day-actions,
+.focus-mode .reader-header .reader-tools,
+.focus-mode .pdf-toolbar,
+.focus-mode .reading-progress { display: none !important; }
+
+.focus-mode .layout { display: block; max-width: none; margin-top: 0; }
+.focus-mode .reader { padding-bottom: 0; }
+.focus-mode .reader-header { display: none; }
+.focus-mode .pdf-page-wrap { width: min(100%, 1000px); margin-bottom: 16px; }
+
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .day-tile, .sidebar a, .day-action, .reading-progress span { transition: none; }
@@ -552,12 +709,18 @@ audio {
 
   .home-header { margin-bottom: 29px; }
   .home-mark { width: 48px; height: 48px; margin-bottom: 14px; }
-  .home h1 { font-size: 2.25rem; }
-  .home-arabic { font-size: 1.35rem; }
+  .home-title { font-size: 2.2rem; }
+  .home-english { font-size: 1.65rem; }
   .home .subtitle { font-size: .86rem; line-height: 1.55; }
 
   .day-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .day-tile { min-height: 112px; padding: 15px; border-radius: 7px; }
+  /* Keep the final Friday tile centred in the otherwise 2-column mobile grid. */
+  .day-tile:last-child {
+    grid-column: 1 / -1;
+    width: calc(50% - 5px);
+    justify-self: center;
+  }
   .day-number { margin-bottom: 4px; font-size: .64rem; }
   .day-name { font-size: 1.05rem; }
   .day-tile small { margin-top: 5px; font-size: .67rem; line-height: 1.35; }
@@ -580,7 +743,7 @@ audio {
     display: flex;
     gap: 4px;
     overflow-x: auto;
-    margin: 0 -1px 21px;
+    margin: 0 -1px 20px;
     padding: 3px;
     border-radius: 7px;
     scrollbar-width: none;
@@ -599,13 +762,22 @@ audio {
     font-size: .77rem;
   }
 
-  .reader-header { width: 100%; margin-top: 2px; margin-bottom: 7px; padding: 0 2px; }
+  .reader-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    margin-bottom: 6px;
+    padding: 0 2px;
+    gap: 7px;
+  }
   .reader-title { font-size: .98rem; }
   .reader-help { font-size: .7rem; }
+  .reader-tools { grid-column: 1 / -1; justify-content: flex-start; }
+  .desktop-tool, .desktop-only { display: none !important; }
+  .reader-tool { min-height: 28px; font-size: .66rem; }
 
   .reading-progress { margin-bottom: 13px; }
 
   .pdf-viewer { padding-bottom: 2px; }
+  .offline-status { margin-top: 3px; padding: 0 2px; }
 
   .reader { padding-bottom: 10px; }
   .pdf-page-wrap {
@@ -633,15 +805,30 @@ audio {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
   }
-  .player-inner { display: block; }
+  .player-inner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
   .player-title { display: none; }
-  .player audio { width: 100%; }
+  .player audio { width: 100%; flex: 1 1 auto; min-width: 0; }
+  .audio-extra { flex: 0 0 auto; }
+  .speed-control {
+    min-width: 37px;
+    height: 30px;
+    border-color: rgba(38,55,47,.22);
+    background: rgba(255,253,248,.72);
+    color: var(--green-800);
+  }
+
+  .home-tools, .install-card { width: 100%; }
 }
 
 @media (max-width: 420px) {
   .day-grid { gap: 8px; }
   .day-tile { min-height: 101px; padding: 14px; }
+  .day-tile:last-child { width: calc(50% - 4px); }
   .day-name { font-size: 1rem; }
-  .home h1 { font-size: 2.05rem; }
-  .home-arabic { font-size: 1.25rem; }
+  .home-title { font-size: 2rem; }
+  .home-english { font-size: 1.55rem; }
 }
