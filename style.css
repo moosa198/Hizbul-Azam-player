@@ -168,7 +168,7 @@ audio {
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   min-height: 148px;
   padding: 22px;
   overflow: hidden;
@@ -207,28 +207,33 @@ audio {
 }
 
 .day-number {
-  position: absolute;
-  top: 18px;
-  left: 20px;
-  color: var(--gold);
-  font-family: Georgia, serif;
-  font-size: .72rem;
-  letter-spacing: .12em;
-}
-
-.day-tile span {
   position: relative;
   z-index: 1;
+  display: block;
+  margin-bottom: 5px;
+  color: var(--gold);
+  font-family: Georgia, serif;
+  font-size: .68rem;
+  line-height: 1;
+  letter-spacing: .14em;
+}
+
+.day-name {
+  position: relative;
+  z-index: 1;
+  display: block;
   color: var(--green-900);
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.25rem;
+  line-height: 1.15;
   font-weight: 500;
 }
 
 .day-tile small {
   position: relative;
   z-index: 1;
-  margin-top: 3px;
+  display: block;
+  margin-top: 6px;
   color: var(--muted);
   font-size: .72rem;
   letter-spacing: .04em;
@@ -263,7 +268,7 @@ audio {
   gap: 18px;
   max-width: 1320px;
   margin: 0 auto;
-  padding: 16px 0 13px;
+  padding: 13px 0 11px;
   border-bottom: 1px solid rgba(217,213,200,.72);
 }
 
@@ -316,7 +321,7 @@ audio {
   grid-template-columns: 190px minmax(0, 1fr);
   gap: 30px;
   max-width: 1320px;
-  margin: 20px auto 0;
+  margin: 16px auto 0;
 }
 
 .sidebar {
@@ -371,7 +376,7 @@ audio {
   justify-content: space-between;
   gap: 12px;
   max-width: 800px;
-  margin: 0 auto 8px;
+  margin: 0 auto 6px;
 }
 
 .reader-title {
@@ -551,15 +556,15 @@ audio {
   .home .subtitle { font-size: .86rem; line-height: 1.55; }
 
   .day-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .day-tile { min-height: 112px; padding: 16px; border-radius: 7px; }
-  .day-tile span { font-size: 1.05rem; }
-  .day-tile small { font-size: .67rem; }
-  .day-number { top: 14px; left: 15px; }
+  .day-tile { min-height: 112px; padding: 15px; border-radius: 7px; }
+  .day-number { margin-bottom: 4px; font-size: .64rem; }
+  .day-name { font-size: 1.05rem; }
+  .day-tile small { margin-top: 5px; font-size: .67rem; line-height: 1.35; }
   .day-tile::before { top: 15px; right: 16px; width: 23px; height: 23px; }
   .day-tile::after { top: 25px; right: 25px; width: 4px; height: 4px; }
   .home .ornament { margin-top: 15px; }
 
-  .page { padding: 0 8px 94px; }
+  .page { padding: 0 8px 104px; }
 
   .topbar { padding: 11px 3px 9px; }
   .topbar-arabic { display: none; }
@@ -567,19 +572,23 @@ audio {
   .current-day { font-size: .95rem; }
   .day-count { font-size: .7rem; }
 
-  .layout { display: block; margin-top: 10px; }
+  .layout { display: block; margin-top: 8px; }
 
   .sidebar {
-    position: static;
+    position: relative;
     display: flex;
     gap: 4px;
     overflow-x: auto;
-    margin: 0 -1px 11px;
+    margin: 0 -1px 9px;
     padding: 3px;
     border-radius: 7px;
     scrollbar-width: none;
   }
   .sidebar::-webkit-scrollbar { display: none; }
+  .sidebar {
+    mask-image: linear-gradient(to right, black 0, black calc(100% - 22px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 22px), transparent 100%);
+  }
   .sidebar-label { display: none; }
   .sidebar a {
     flex: 0 0 auto;
@@ -589,7 +598,7 @@ audio {
     font-size: .77rem;
   }
 
-  .reader-header { margin-bottom: 6px; padding: 0 2px; }
+  .reader-header { margin-bottom: 5px; padding: 0 2px; }
   .reader-title { font-size: .98rem; }
   .reader-help { font-size: .7rem; }
 
@@ -612,7 +621,15 @@ audio {
   .day-action.muted { display: none; }
   .day-action { min-height: 38px; padding: 7px 9px; font-size: .76rem; }
 
-  .player { padding: 7px 9px; }
+  .player {
+    padding: 6px 9px calc(7px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(217,213,200,.9);
+    background: rgba(247,244,236,.96);
+    box-shadow: 0 -5px 18px rgba(31,54,42,.08);
+    color: var(--ink);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
   .player-inner { display: block; }
   .player-title { display: none; }
   .player audio { width: 100%; }
@@ -621,6 +638,7 @@ audio {
 @media (max-width: 420px) {
   .day-grid { gap: 8px; }
   .day-tile { min-height: 101px; padding: 14px; }
+  .day-name { font-size: 1rem; }
   .home h1 { font-size: 2.05rem; }
   .home-arabic { font-size: 1.25rem; }
 }
