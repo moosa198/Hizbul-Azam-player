@@ -1,21 +1,18 @@
-# Hizbul-Azam — updated web files
+# Hizbul-Azam — UX audio progress update
 
-This package adds the next UX improvements in the agreed order:
+This version fixes the desktop audio player so the progress track, current time, duration, and seek control are visible and functional.
 
-1. Installable PWA / Add to Home Screen
-2. Offline support with per-day offline saving
-3. Remembers last PDF page and audio position
-4. Compact 1× / 1.5× / 2× playback-speed control
-5. Focus / full-screen reading mode
-6. Desktop-only PDF zoom controls
+## Desktop audio controls
+- Play / pause
+- Visible progress track with moving position indicator
+- Current time / total duration
+- Click or drag the progress track to seek
+- 1× / 1.5× / 2× speed control
+
+## Mobile
+Mobile keeps the compact native audio player and the separate speed button.
 
 ## GitHub Pages
+Upload/replace the files in this package in the repository root. Keep the `audio/`, `pdfs/`, and `icons/` folders in place.
 
-Upload/replace these files in the repository root. Keep the existing `pdfs/` and `audio/` folders in place.
-
-The package expects:
-
-- `pdfs/saturday.pdf` through `pdfs/friday.pdf`
-- `audio/saturday.mp3` through `audio/friday.mp3`
-
-The new offline feature does **not** automatically download all seven large audio files. On each day, use **Save offline** to save that day's PDF and audio for offline use.
+The day pages use versioned CSS/JS URLs and the service-worker cache version has been bumped so the updated player is not trapped behind the older cached assets.

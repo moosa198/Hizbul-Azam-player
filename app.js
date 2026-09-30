@@ -33,6 +33,8 @@
     const progress = document.getElementById('audio-progress');
     const currentTime = document.getElementById('current-time');
     const duration = document.getElementById('duration');
+    const progressFill = document.getElementById('audio-progress-fill');
+    const progressThumb = document.getElementById('audio-progress-thumb');
 
     function formatTime(value) {
       if (!Number.isFinite(value) || value < 0) return '0:00';
@@ -52,7 +54,8 @@
       const clamped = Math.max(0, Math.min(100, value));
       progress.value = String(clamped);
       progress.style.setProperty('--progress', clamped + '%');
-      progress.style.background = 'linear-gradient(to right, var(--gold-soft) 0%, var(--gold-soft) ' + clamped + '%, rgba(255,253,248,.24) ' + clamped + '%, rgba(255,253,248,.24) 100%)';
+      if (progressFill) progressFill.style.width = clamped + '%';
+      if (progressThumb) progressThumb.style.left = clamped + '%';
       if (currentTime) currentTime.textContent = formatTime(audio.currentTime);
       if (duration) duration.textContent = formatTime(audio.duration);
     }
@@ -124,6 +127,7 @@
 
     updatePlayButton();
     updateProgress();
+    document.body.classList.add('js-audio-ready');
   }
 
   window.HizbulAzam = window.HizbulAzam || {};
@@ -243,7 +247,7 @@
         }, [messageChannel.port2]);
       });
 
-      const cache = await caches.open('hizbul-azam-content-v1');
+      const cache = await caches.open('hizbul-azam-content-v4');
       const pdfCached = await cache.match(new URL(pdfUrl, location.href).href);
       const audioCached = await cache.match(new URL(audioUrl, location.href).href);
       if (pdfCached && audioCached) setState('Available without internet', true);
@@ -253,7 +257,7 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js').catch(function () {});
+      navigator.serviceWorker.register('./sw.js?v=6').catch(function () {});
     });
   }
 
