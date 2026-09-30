@@ -1,56 +1,15 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#eaf4ed">
-  <title>Hizbul-Azam — Monday</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body class="day-page">
-  <aside class="sidebar" aria-label="Daily portions">
-    <a class="home-link" href="index.html">← Home</a>
-    <div class="sidebar-days">
-      <a href="saturday.html">Saturday</a>
-<a href="sunday.html">Sunday</a>
-<a href="monday.html">Monday</a>
-<a href="tuesday.html">Tuesday</a>
-<a href="wednesday.html">Wednesday</a>
-<a href="thursday.html">Thursday</a>
-<a href="friday.html">Friday</a>
-    </div>
-  </aside>
-
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Monday — Hizbul-Azam</title><link rel="stylesheet" href="style.css"></head>
+<body class="page">
+<header class="topbar"><a class="home-link" href="index.html">← Home</a><span class="current-day">Monday</span></header>
+<div class="layout">
+  <aside class="sidebar" aria-label="Daily portions"><a class="" href="saturday.html">Saturday</a><a class="" href="sunday.html">Sunday</a><a class="active" href="monday.html">Monday</a><a class="" href="tuesday.html">Tuesday</a><a class="" href="wednesday.html">Wednesday</a><a class="" href="thursday.html">Thursday</a><a class="" href="friday.html">Friday</a></aside>
   <main class="reader">
-    <header class="reader-header">
-      <a class="mobile-home" href="index.html">← Home</a>
-      <h1>Monday</h1>
-      <select class="day-select" aria-label="Choose a day" onchange="if(this.value) window.location.href=this.value">
-        <option value="">Go to day…</option>
-        <option value="saturday.html" >Saturday</option><option value="sunday.html" >Sunday</option><option value="monday.html" selected>Monday</option><option value="tuesday.html" >Tuesday</option><option value="wednesday.html" >Wednesday</option><option value="thursday.html" >Thursday</option><option value="friday.html" >Friday</option>
-      </select>
-    </header>
-
-    <section class="pdf-wrap" aria-label="Monday Hizbul-Azam">
-      <iframe
-        src="pdfs/monday.pdf"
-        title="Monday Hizbul-Azam PDF"
-        loading="eager">
-      </iframe>
-      <p class="pdf-fallback">
-        If the PDF does not display, <a href="pdfs/monday.pdf">open the PDF directly</a>.
-      </p>
-    </section>
+    <iframe class="pdf-frame" src="pdfs/monday.pdf#toolbar=1&navpanes=0&view=FitH" title="Monday Hizbul-Azam PDF"></iframe>
+    <p class="pdf-fallback">If the PDF does not display in your browser, <a href="pdfs/monday.pdf">open the Monday PDF</a>.</p>
   </main>
-
-  <footer class="audio-bar">
-    <div class="audio-label">
-      <strong>Monday</strong>
-      <span>Hizbul-Azam</span>
-    </div>
-    <audio controls preload="metadata" src="audio/monday.mp3">
-      Your browser does not support audio playback.
-    </audio>
-  </footer>
+</div>
+<footer class="player"><div class="player-title">Monday audio</div><audio controls preload="metadata"><source src="audio/monday.mp3" type="audio/mpeg">Your browser does not support audio playback.</audio></footer>
 </body>
 </html>
