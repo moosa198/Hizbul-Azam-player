@@ -294,7 +294,7 @@
         }, [messageChannel.port2]);
       });
 
-      const cache = await caches.open('hizbul-azam-content-v5');
+      const cache = await caches.open('hizbul-azam-content-v6');
       const pdfCached = await cache.match(new URL(pdfUrl, location.href).href);
       const audioCached = await cache.match(new URL(audioUrl, location.href).href);
       if (pdfCached && audioCached) setState('Available without internet', true);
@@ -304,7 +304,7 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=7').catch(function () {});
+      navigator.serviceWorker.register('./sw.js?v=8').catch(function () {});
     });
   }
 

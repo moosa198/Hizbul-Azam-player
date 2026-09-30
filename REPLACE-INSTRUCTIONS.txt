@@ -1,0 +1,23 @@
+HIZBUL-AZAM ICON UPDATE v8
+
+Replace these files in GitHub:
+- icons/icon-192-v2.png
+- icons/icon-512-v2.png
+- icons/favicon-32-v2.png
+- index.html
+- saturday.html
+- sunday.html
+- monday.html
+- tuesday.html
+- wednesday.html
+- thursday.html
+- friday.html
+- manifest.webmanifest
+- app.js
+- sw.js
+
+IMPORTANT: Delete these old icon files from GitHub:
+- icons/icon-192.png
+- icons/icon-512.png
+
+Do not delete any audio, PDF, CSS, or other site files.
