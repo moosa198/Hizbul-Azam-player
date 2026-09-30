@@ -43,6 +43,101 @@
     if (zoomLevel) zoomLevel.textContent = Math.round(zoom * 100) + '%';
   }
 
+
+  function hslToRgb(h, s, l) {
+    let r, g, b;
+    if (s === 0) return [l, l, l];
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    };
+    const q = l < .5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+    return [r, g, b];
+  }
+
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+    const d = max - min;
+    if (d) {
+      s = l > .5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        default: h = (r - g) / d + 4;
+      }
+      h /= 6;
+    }
+    return [h, s, l];
+  }
+
+  function applyDarkPdfPalette(canvas) {
+    if (document.documentElement.dataset.theme !== 'dark') return;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) return;
+
+    const image = context.getImageData(0, 0, canvas.width, canvas.height);
+    const data = image.data;
+    const paper = [0x20, 0x2d, 0x26];
+    const ink = [0xee, 0xeb, 0xe1];
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const chroma = max - min;
+      const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+
+      if (chroma < 22) {
+        // Map white paper to deep green-black and black text to warm ivory.
+        const t = 1 - luminance;
+        data[i]     = Math.round(paper[0] + (ink[0] - paper[0]) * t);
+        data[i + 1] = Math.round(paper[1] + (ink[1] - paper[1]) * t);
+        data[i + 2] = Math.round(paper[2] + (ink[2] - paper[2]) * t);
+      } else {
+        // Preserve coloured accents while lifting them for dark backgrounds.
+        let [h, s, l] = rgbToHsl(r, g, b);
+        if (h > .08 && h < .18 && s > .18) {
+          // Warm gold remains warm and readable.
+          l = Math.min(.72, .48 + l * .35);
+          s = Math.max(.38, Math.min(.72, s));
+        } else if (h > .25 && h < .55 && s > .12) {
+          // Botanical green becomes a softer, lighter green.
+          h = .42;
+          l = Math.min(.62, .34 + l * .45);
+          s = Math.max(.28, Math.min(.58, s));
+        } else {
+          // Any other coloured artwork gets a restrained luminance lift.
+          l = Math.min(.78, .30 + l * .48);
+          s = Math.min(.65, s * .9);
+        }
+        const rgb = hslToRgb(h, s, l);
+        data[i] = Math.round(rgb[0] * 255);
+        data[i + 1] = Math.round(rgb[1] * 255);
+        data[i + 2] = Math.round(rgb[2] * 255);
+      }
+    }
+    context.putImageData(image, 0, 0);
+  }
+
+  function rerenderForTheme() {
+    pages.forEach((wrap) => {
+      if (wrap.dataset.rendered !== 'true') return;
+      wrap.replaceChildren();
+      delete wrap.dataset.rendered;
+      renderPage(wrap);
+    });
+  }
+
   async function renderPage(wrap) {
     if (!pdf || wrap.dataset.loading === 'true') return;
 
@@ -71,6 +166,7 @@
         transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : null
       }).promise;
 
+      applyDarkPdfPalette(canvas);
       wrap.replaceChildren(canvas);
       wrap.dataset.rendered = 'true';
     } catch (error) {
@@ -98,6 +194,8 @@
     updateZoomLabel();
     rerenderRenderedPages();
   }
+
+  window.addEventListener('hizbulAzam:themechange', rerenderForTheme);
 
   function setupPdfControls() {
     const controls = document.getElementById('pdf-controls');

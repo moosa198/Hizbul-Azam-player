@@ -1,18 +1,14 @@
-# Hizbul-Azam — UX audio progress update
+# Hizbul-Azam — v7
 
-This version fixes the desktop audio player so the progress track, current time, duration, and seek control are visible and functional.
+This package includes the complete Hizbul-Azam site.
 
-## Desktop audio controls
-- Play / pause
-- Visible progress track with moving position indicator
-- Current time / total duration
-- Click or drag the progress track to seek
-- 1× / 1.5× / 2× speed control
+## v7 additions
+- Light/dark mode toggle across the site.
+- Dark mode dynamically transforms PDF.js-rendered PDF pages; no duplicate dark PDFs are required.
+- Theme preference is remembered on the device.
+- PDF colour treatment preserves the warm ivory text and botanical green/gold accents as far as possible.
+- Updated service-worker and asset cache versions.
+- Offline saving continues to cache the selected day's PDF and audio.
 
-## Mobile
-Mobile keeps the compact native audio player and the separate speed button.
-
-## GitHub Pages
-Upload/replace the files in this package in the repository root. Keep the `audio/`, `pdfs/`, and `icons/` folders in place.
-
-The day pages use versioned CSS/JS URLs and the service-worker cache version has been bumped so the updated player is not trapped behind the older cached assets.
+## Upload
+Replace the contents of the existing GitHub Pages site with the contents of this folder, including `audio/`, `pdfs/`, and `icons/`.

@@ -1,7 +1,7 @@
-const SHELL_CACHE = 'hizbul-azam-shell-v4';
-const CONTENT_CACHE = 'hizbul-azam-content-v4';
+const SHELL_CACHE = 'hizbul-azam-shell-v5';
+const CONTENT_CACHE = 'hizbul-azam-content-v5';
 const SHELL = [
-  './', './index.html', './style.css?v=6', './app.js?v=6', './pdf-viewer.js', './manifest.webmanifest',
+  './', './index.html', './style.css?v=7', './app.js?v=7', './pdf-viewer.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png',
   './saturday.html', './sunday.html', './monday.html', './tuesday.html',
   './wednesday.html', './thursday.html', './friday.html'

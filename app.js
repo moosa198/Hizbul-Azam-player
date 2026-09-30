@@ -12,6 +12,53 @@
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
   }
 
+
+  function setupTheme() {
+    const root = document.documentElement;
+    const key = STORAGE_PREFIX + 'theme';
+    let saved = null;
+    try { saved = localStorage.getItem(key); } catch (_) {}
+    const initial = saved === 'dark' || saved === 'light'
+      ? saved
+      : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    root.dataset.theme = initial;
+
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const updateMeta = () => {
+      if (meta) meta.setAttribute('content', root.dataset.theme === 'dark' ? '#151f1a' : '#f7f4ec');
+    };
+
+    const host = document.querySelector('.home-header') || document.querySelector('.topbar');
+    if (!host) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'theme-toggle';
+    button.setAttribute('aria-label', 'Switch to dark mode');
+    button.title = 'Switch to dark mode';
+
+    function updateButton() {
+      const dark = root.dataset.theme === 'dark';
+      button.textContent = dark ? '☀' : '◐';
+      button.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+      button.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+    }
+
+    button.addEventListener('click', function () {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try { localStorage.setItem(key, next); } catch (_) {}
+      updateButton();
+      updateMeta();
+      window.dispatchEvent(new CustomEvent('hizbulAzam:themechange', { detail: { theme: next } }));
+    });
+
+    host.appendChild(button);
+    updateButton();
+    updateMeta();
+  }
+
   function getSpeed() {
     const speed = Number(localStorage.getItem(speedKey));
     return [1, 1.5, 2].includes(speed) ? speed : 1;
@@ -247,7 +294,7 @@
         }, [messageChannel.port2]);
       });
 
-      const cache = await caches.open('hizbul-azam-content-v4');
+      const cache = await caches.open('hizbul-azam-content-v5');
       const pdfCached = await cache.match(new URL(pdfUrl, location.href).href);
       const audioCached = await cache.match(new URL(audioUrl, location.href).href);
       if (pdfCached && audioCached) setState('Available without internet', true);
@@ -257,10 +304,11 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=6').catch(function () {});
+      navigator.serviceWorker.register('./sw.js?v=7').catch(function () {});
     });
   }
 
+  setupTheme();
   setupAudio();
   setupContinueCard();
   setupInstall();
