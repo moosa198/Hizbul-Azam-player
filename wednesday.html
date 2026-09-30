@@ -1,15 +1,15 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wednesday — Hizbul-Azam</title><link rel="stylesheet" href="style.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wednesday — Hizbul-Azam</title><link rel="stylesheet" href="style.css">  <script src="pdf-viewer.js" defer></script></head>
 <body class="page">
 <header class="topbar"><a class="home-link" href="index.html">← Home</a><span class="current-day">Wednesday</span></header>
 <div class="layout">
   <aside class="sidebar" aria-label="Daily portions"><a class="" href="saturday.html">Saturday</a><a class="" href="sunday.html">Sunday</a><a class="" href="monday.html">Monday</a><a class="" href="tuesday.html">Tuesday</a><a class="active" href="wednesday.html">Wednesday</a><a class="" href="thursday.html">Thursday</a><a class="" href="friday.html">Friday</a></aside>
   <main class="reader">
-    <iframe class="pdf-frame" src="pdfs/wednesday.pdf#toolbar=1&navpanes=0&view=FitH" title="Wednesday Hizbul-Azam PDF"></iframe>
-    <p class="pdf-fallback">If the PDF does not display in your browser, <a href="pdfs/wednesday.pdf">open the Wednesday PDF</a>.</p>
+    <div id="pdf-viewer" class="pdf-viewer" data-pdf="pdfs/wednesday.pdf"><div id="pdf-status" class="pdf-status">Loading PDF…</div></div>
+    <p id="pdf-fallback" class="pdf-fallback">If the PDF cannot be displayed, <a href="pdfs/wednesday.pdf">open the Wednesday PDF</a>.</p>
   </main>
 </div>
-<footer class="player"><div class="player-title">Wednesday audio</div><audio controls preload="metadata"><source src="audio/wednesday.mp3" type="audio/mpeg">Your browser does not support audio playback.</audio></footer>
+<footer class="player"><div class="player-inner"><div class="player-title">Wednesday audio</div><audio controls preload="metadata"><source src="audio/wednesday.mp3" type="audio/mpeg">Your browser does not support audio playback.</audio></div></footer>
 </body>
 </html>
