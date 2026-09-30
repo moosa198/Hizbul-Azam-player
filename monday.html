@@ -65,13 +65,22 @@
   <footer class="player">
     <div class="player-inner">
       <div class="player-title">Monday audio<small>Listen while you read</small></div>
+      <div class="audio-control-area">
+        <div class="desktop-audio-controls" aria-label="Audio playback">
+          <button id="play-control" class="play-control" type="button" aria-label="Play audio">▶</button>
+          <div class="audio-progress-wrap">
+            <div class="audio-times"><span id="current-time">0:00</span><span id="duration">0:00</span></div>
+            <input id="audio-progress" class="audio-progress" type="range" min="0" max="100" value="0" step="0.1" aria-label="Audio progress">
+          </div>
+        </div>
+        <audio controls preload="metadata" data-day="monday" aria-label="Monday audio">
+        <source src="audio/monday.mp3" type="audio/mpeg">
+        Your browser does not support audio playback.
+        </audio>
+      </div>
       <div class="audio-extra" aria-label="Playback controls">
         <button id="speed-control" class="speed-control" type="button" aria-label="Playback speed 1 times. Tap to change.">1×</button>
       </div>
-      <audio controls preload="metadata" data-day="monday" aria-label="Monday audio">
-        <source src="audio/monday.mp3" type="audio/mpeg">
-        Your browser does not support audio playback.
-      </audio>
     </div>
   </footer>
 </body>

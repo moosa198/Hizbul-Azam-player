@@ -29,6 +29,42 @@
     const positionKey = STORAGE_PREFIX + 'audio:' + day;
     const saved = Number(localStorage.getItem(positionKey));
     const speedButton = document.getElementById('speed-control');
+    const playButton = document.getElementById('play-control');
+    const progress = document.getElementById('audio-progress');
+    const currentTime = document.getElementById('current-time');
+    const duration = document.getElementById('duration');
+
+    function formatTime(value) {
+      if (!Number.isFinite(value) || value < 0) return '0:00';
+      const totalSeconds = Math.floor(value);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      if (hours) return hours + ':' + String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+      return minutes + ':' + String(seconds).padStart(2, '0');
+    }
+
+    function updateProgress() {
+      if (!progress) return;
+      const value = Number.isFinite(audio.duration) && audio.duration > 0
+        ? (audio.currentTime / audio.duration) * 100
+        : 0;
+      const clamped = Math.max(0, Math.min(100, value));
+      progress.value = String(clamped);
+      progress.style.setProperty('--progress', clamped + '%');
+      progress.style.background = 'linear-gradient(to right, var(--gold-soft) 0%, var(--gold-soft) ' + clamped + '%, rgba(255,253,248,.24) ' + clamped + '%, rgba(255,253,248,.24) 100%)';
+      if (currentTime) currentTime.textContent = formatTime(audio.currentTime);
+      if (duration) duration.textContent = formatTime(audio.duration);
+    }
+
+    function updatePlayButton() {
+      if (!playButton) return;
+      const playing = !audio.paused && !audio.ended;
+      playButton.textContent = playing ? '❚❚' : '▶';
+      playButton.setAttribute('aria-label', playing ? 'Pause audio' : 'Play audio');
+    }
+
+    let lastSaved = 0;
 
     audio.playbackRate = getSpeed();
     if (speedButton) speedButton.textContent = audio.playbackRate + '×';
@@ -37,22 +73,43 @@
       if (Number.isFinite(saved) && saved > 0 && saved < audio.duration - 2) {
         audio.currentTime = saved;
       }
+      updateProgress();
     }, { once: true });
 
-    let lastSaved = 0;
     audio.addEventListener('timeupdate', function () {
+      updateProgress();
       if (audio.currentTime - lastSaved < 4) return;
       lastSaved = audio.currentTime;
       try { localStorage.setItem(positionKey, String(audio.currentTime)); } catch (_) {}
+    });
+
+    audio.addEventListener('durationchange', updateProgress);
+    audio.addEventListener('play', updatePlayButton);
+    audio.addEventListener('pause', updatePlayButton);
+    audio.addEventListener('ended', function () {
+      updatePlayButton();
+      updateProgress();
+      try { localStorage.removeItem(positionKey); } catch (_) {}
     });
 
     audio.addEventListener('pause', function () {
       try { localStorage.setItem(positionKey, String(audio.currentTime)); } catch (_) {}
     });
 
-    audio.addEventListener('ended', function () {
-      try { localStorage.removeItem(positionKey); } catch (_) {}
-    });
+    if (playButton) {
+      playButton.addEventListener('click', function () {
+        if (audio.paused) audio.play().catch(function () {});
+        else audio.pause();
+      });
+    }
+
+    if (progress) {
+      progress.addEventListener('input', function () {
+        if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+        audio.currentTime = (Number(progress.value) / 100) * audio.duration;
+        updateProgress();
+      });
+    }
 
     if (speedButton) {
       speedButton.addEventListener('click', function () {
@@ -64,6 +121,9 @@
         speedButton.setAttribute('aria-label', 'Playback speed ' + next + ' times. Tap to change.');
       });
     }
+
+    updatePlayButton();
+    updateProgress();
   }
 
   window.HizbulAzam = window.HizbulAzam || {};
