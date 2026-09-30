@@ -1,27 +1,25 @@
-# Hizbul-Azam Daily Playlist
+# Hizbul-Azam — website package v5
 
-A simple GitHub Pages website for reading and listening to the seven daily portions of Hizbul-Azam.
+## Included
+- Refined responsive website
+- 7 rebuilt PDFs with deep botanical green accents replacing the source magenta
+- 7 audio files with the final 20 seconds removed
+- PDF.js in-page reader
 
-## Structure
+## PDF source-page mapping
+- Saturday: 13–37
+- Sunday: 49, 37–48, 51–63
+- Monday: 69, 63–68, 71–88
+- Tuesday: 93, 88–92, 95–116
+- Wednesday: 117, 119–139
+- Thursday: 141, 143–164
+- Friday: 165–197
 
-- Saturday — PDF pages 13–48
-- Sunday — PDF pages 49–68
-- Monday — PDF pages 69–92
-- Tuesday — PDF pages 93–116
-- Wednesday — PDF pages 117–139
-- Thursday — PDF pages 141–164
-- Friday — PDF pages 165–197
+The page numbers above refer to the original 224-page source PDF.
 
-The Introduction is intentionally excluded.
-
-## GitHub Pages
-
-1. Create a new GitHub repository.
-2. Upload **all files and folders in this directory**.
-3. Go to **Settings → Pages**.
-4. Under **Build and deployment**, select **Deploy from a branch**.
-5. Select the `main` branch and `/ (root)`.
-6. Save.
-7. GitHub will provide the Pages URL.
-
-The site uses only HTML and CSS and does not require a build process.
+## UX refinements
+- Cleaner mobile separation between the horizontal day navigation and reader heading
+- Desktop PDF reading width reduced slightly for a more book-like presentation
+- Mobile PDF remains full-width
+- Persistent audio player remains minimal on mobile and green on desktop
+- Homepage tiles show only day, number and portion (no “Read & listen”)
