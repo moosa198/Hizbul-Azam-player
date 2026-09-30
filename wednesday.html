@@ -1,15 +1,59 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wednesday — Hizbul-Azam</title><link rel="stylesheet" href="style.css">  <script src="pdf-viewer.js" defer></script></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5faf6">
+  <title>Wednesday — Hizbul-Azam</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="pdf-viewer.js" defer></script>
+</head>
 <body class="page">
-<header class="topbar"><a class="home-link" href="index.html">← Home</a><span class="current-day">Wednesday</span></header>
-<div class="layout">
-  <aside class="sidebar" aria-label="Daily portions"><a class="" href="saturday.html">Saturday</a><a class="" href="sunday.html">Sunday</a><a class="" href="monday.html">Monday</a><a class="" href="tuesday.html">Tuesday</a><a class="active" href="wednesday.html">Wednesday</a><a class="" href="thursday.html">Thursday</a><a class="" href="friday.html">Friday</a></aside>
-  <main class="reader">
-    <div id="pdf-viewer" class="pdf-viewer" data-pdf="pdfs/wednesday.pdf"><div id="pdf-status" class="pdf-status">Loading PDF…</div></div>
-    <p id="pdf-fallback" class="pdf-fallback">If the PDF cannot be displayed, <a href="pdfs/wednesday.pdf">open the Wednesday PDF</a>.</p>
-  </main>
-</div>
-<footer class="player"><div class="player-inner"><div class="player-title">Wednesday audio</div><audio controls preload="metadata"><source src="audio/wednesday.mp3" type="audio/mpeg">Your browser does not support audio playback.</audio></div></footer>
+  <header class="topbar">
+    <a class="home-link" href="index.html">← All days</a>
+    <div class="day-heading">
+      <span class="current-day">Wednesday</span>
+      <span class="day-count">5 of 7</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="Daily portions">
+      <div class="sidebar-label">Daily portions</div>
+      <a href="saturday.html">Saturday</a><a href="sunday.html">Sunday</a><a href="monday.html">Monday</a><a href="tuesday.html">Tuesday</a><a href="wednesday.html" class="active" aria-current="page">Wednesday</a><a href="thursday.html">Thursday</a><a href="friday.html">Friday</a>
+    </aside>
+
+    <main class="reader">
+      <div class="reader-header">
+        <p class="reader-title">Wednesday portion</p>
+        <p class="reader-help"><span id="current-page">1</span> / <span id="total-pages">—</span> pages</p>
+      </div>
+      <div class="reading-progress" aria-hidden="true"><span id="reading-progress"></span></div>
+
+      <div id="pdf-viewer" class="pdf-viewer" data-pdf="pdfs/wednesday.pdf" aria-label="Wednesday PDF">
+        <div id="pdf-status" class="pdf-status">Loading Wednesday portion…</div>
+      </div>
+
+      <p id="pdf-fallback" class="pdf-fallback" hidden>
+        The reader could not display the PDF. <a href="pdfs/wednesday.pdf">Open the Wednesday PDF</a> instead.
+      </p>
+
+      <nav class="day-actions" aria-label="Portion navigation">
+        <a class="day-action" href="tuesday.html">← Tuesday</a>
+        <a class="day-action home-action" href="index.html">All days</a>
+        <a class="day-action primary" href="thursday.html">Thursday →</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="player">
+    <div class="player-inner">
+      <div class="player-title">Wednesday audio<small>Listen while you read</small></div>
+      <audio controls preload="metadata" aria-label="Wednesday audio">
+        <source src="audio/wednesday.mp3" type="audio/mpeg">
+        Your browser does not support audio playback.
+      </audio>
+    </div>
+  </footer>
 </body>
 </html>
