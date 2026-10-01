@@ -36,6 +36,7 @@
     if (currentPage) currentPage.textContent = pageNumber;
     if (totalPages) totalPages.textContent = total;
     if (progressBar) progressBar.style.width = ((pageNumber / total) * 100) + '%';
+    window.dispatchEvent(new CustomEvent('hizbulAzam:pagechange', { detail: { day: day, page: pageNumber, total: total } }));
     if (!restoring) savePage(pageNumber);
   }
 

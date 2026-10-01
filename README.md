@@ -1,19 +1,18 @@
-# Hizbul-Azam — v8
+# Hizbul-Azam — v10
 
-This package includes the complete Hizbul-Azam site.
+Complete GitHub Pages / PWA package for the Hizbul-Azam daily reading and listening experience.
 
-## v8 additions
-- Optional English translation on every daily reading page.
-- Translation opens as a discreet side drawer on desktop and a bottom sheet on mobile, so the Arabic PDF remains the primary reading experience.
-- The Arabic PDF is unchanged; translation is a separate content layer rather than a second PDF.
-- English is extracted and cleaned from the user-supplied bilingual Hizbul-Azam edition.
-- References contained in the supplied translation are retained where they can be cleanly identified.
-- Translation files are cached with the site's offline content, so a saved day can be read with its English translation without internet access.
-- Updated service-worker and asset cache versions.
-- Existing light/dark mode and PDF.js dark-reading treatment are retained.
+## v10 UX improvements
+- Arabic remains the primary reading experience.
+- English translation is opened from the fixed audio bar, so it remains available throughout long PDF reading on mobile and desktop.
+- Translation opens as a side drawer on desktop and a bottom sheet on mobile.
+- Translation preserves its own reading position for each day instead of repeatedly returning to the top.
+- The drawer shows the current Arabic PDF page as reading context.
+- Translation does not replace or split the Arabic PDF into a permanent two-column view.
+- Dark mode, PDF.js rendering, custom audio progress, playback speed, offline saving and existing day navigation are retained.
+- PWA install flow is hardened: stable manifest id, explicit GitHub Pages scope/start URL, cache-busted icons/assets, service-worker cache v10, and a manual installation fallback when `beforeinstallprompt` is unavailable.
+- Service worker registration uses `updateViaCache: none` and its precache list matches the v10 assets.
+- New cache-busted app icons use the v2 icon files.
 
 ## Upload
-Replace the contents of the existing GitHub Pages site with the contents of this folder, including `audio/`, `pdfs/`, `icons/`, and `translations/`.
-
-
-Hizbul-Azam Translation v9 — UX fixes: translation control is present in the HTML (not injected only by JS), with explicit dark-mode styling for the translation control and playback-speed button. Asset/cache versions bumped to v9.
+Replace the contents of the existing GitHub Pages repository with the contents of this folder. Keep `audio/`, `pdfs/`, `icons/`, and `translations/` together with the HTML, CSS, JS, manifest and service worker files.

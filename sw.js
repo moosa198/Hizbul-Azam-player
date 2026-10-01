@@ -1,20 +1,25 @@
-const SHELL_CACHE = 'hizbul-azam-shell-v6';
-const CONTENT_CACHE = 'hizbul-azam-content-v6';
+const VERSION = 'v10';
+const SHELL_CACHE = 'hizbul-azam-shell-' + VERSION;
+const CONTENT_CACHE = 'hizbul-azam-content-' + VERSION;
 const SHELL = [
-  './', './index.html', './style.css?v=8', './app.js?v=8', './pdf-viewer.js', './manifest.webmanifest',
-  './icons/icon-192.png', './icons/icon-512.png',
+  './', './index.html', './style.css?v=10', './app.js?v=10', './pdf-viewer.js', './manifest.webmanifest?v=10',
+  './icons/favicon-32-v2.png?v=10', './icons/icon-192-v2.png?v=10', './icons/icon-512-v2.png?v=10',
   './translations/saturday.json', './translations/sunday.json', './translations/monday.json', './translations/tuesday.json', './translations/wednesday.json', './translations/thursday.json', './translations/friday.json',
-  './saturday.html', './sunday.html', './monday.html', './tuesday.html',
-  './wednesday.html', './thursday.html', './friday.html'
+  './saturday.html', './sunday.html', './monday.html', './tuesday.html', './wednesday.html', './thursday.html', './friday.html'
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(SHELL_CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches.open(SHELL_CACHE)
+      .then(cache => cache.addAll(SHELL))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k => ![SHELL_CACHE, CONTENT_CACHE].includes(k)).map(k => caches.delete(k))))
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => ![SHELL_CACHE, CONTENT_CACHE].includes(k)).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -43,7 +48,6 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(request.url);
 
-  // Keep same-origin app/content available offline.
   if (url.origin === self.location.origin) {
     if (url.pathname.includes('/pdfs/') || url.pathname.includes('/audio/') || url.pathname.includes('/translations/')) {
       event.respondWith(
@@ -66,7 +70,6 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Cache PDF.js after its first successful online load so it can be reused offline.
   if (url.hostname === 'cdnjs.cloudflare.com') {
     event.respondWith(
       caches.open(SHELL_CACHE).then(cache =>

@@ -208,37 +208,78 @@
     const button = document.getElementById('install-button');
     if (!card || !button) return;
 
+    const isStandalone = () => {
+      return window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches ||
+        window.navigator.standalone === true;
+    };
+
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isMacSafari = /macintosh/i.test(navigator.userAgent) && /safari/i.test(navigator.userAgent) && !/chrome|crios|android/i.test(navigator.userAgent);
+
+    function showFallback() {
+      if (isStandalone()) return;
+      const copy = card.querySelector('span');
+      if (copy) {
+        copy.textContent = isIOS
+          ? 'Use Share → Add to Home Screen.'
+          : isMacSafari
+            ? 'Use File → Add to Dock to install it as an app.'
+            : 'Use your browser menu to Install or Add to Home screen.';
+      }
+      button.textContent = deferredPrompt ? 'Install' : 'How to install';
+      card.hidden = false;
+    }
+
+    function hideCard() {
+      card.hidden = true;
+    }
+
+    if (isStandalone()) {
+      hideCard();
+      return;
+    }
+
     window.addEventListener('beforeinstallprompt', function (event) {
       event.preventDefault();
       deferredPrompt = event;
-      card.hidden = false;
+      showFallback();
     });
 
     button.addEventListener('click', async function () {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      try { await deferredPrompt.userChoice; } catch (_) {}
-      deferredPrompt = null;
-      card.hidden = true;
+      if (deferredPrompt) {
+        const promptEvent = deferredPrompt;
+        deferredPrompt = null;
+        try {
+          await promptEvent.prompt();
+          await promptEvent.userChoice;
+        } catch (_) {}
+        hideCard();
+        return;
+      }
+
+      const message = isIOS
+        ? 'To install Hizbul-Azam: tap Share, then choose “Add to Home Screen”.'
+        : isMacSafari
+          ? 'To install Hizbul-Azam: choose File → Add to Dock in Safari.'
+          : 'To install Hizbul-Azam: open your browser menu and choose “Install app” or “Add to Home screen”. If you see an install icon in the address bar, you can use that instead.';
+      window.alert(message);
     });
 
-    window.addEventListener('appinstalled', function () {
-      card.hidden = true;
-    });
+    window.addEventListener('appinstalled', hideCard);
+
+    // Some browsers do not expose beforeinstallprompt even when manual
+    // installation is available. Keep the in-page route discoverable.
+    window.setTimeout(showFallback, 1400);
   }
 
   async function setupTranslation() {
-    const tools = document.querySelector('.reader-tools');
     const viewer = document.getElementById('pdf-viewer');
-    if (!tools || !viewer) return;
+    const button = document.getElementById('translation-control');
+    if (!viewer || !button) return;
 
     const day = viewer.dataset.day;
     if (!day) return;
-
-    // Keep the control in the HTML so it is visible even if another script
-    // fails. JS only wires it up and creates the panel here.
-    const button = document.getElementById('translation-control');
-    if (!button) return;
 
     const overlay = document.createElement('div');
     overlay.className = 'translation-overlay';
@@ -254,11 +295,12 @@
         <div>
           <p class="translation-kicker">Translation</p>
           <h2>English</h2>
+          <p class="translation-page" id="translation-page">Current Arabic page · 1</p>
         </div>
         <button type="button" class="translation-close" aria-label="Close translation">×</button>
       </div>
-      <p class="translation-source">English translation from the supplied bilingual edition.</p>
-      <div class="translation-content" id="translation-content">
+      <p class="translation-source">English translation from the supplied bilingual edition. Translation follows the portion in reading order.</p>
+      <div class="translation-content" id="translation-content" tabindex="0">
         <p class="translation-loading">Loading translation…</p>
       </div>`;
 
@@ -266,12 +308,34 @@
     document.body.appendChild(panel);
 
     const content = panel.querySelector('#translation-content');
+    const pageLabel = panel.querySelector('#translation-page');
     const close = panel.querySelector('.translation-close');
+    const storageKey = 'hizbulAzam:translationScroll:' + day;
     let loaded = false;
     let loading = false;
     let open = false;
+    let currentPage = 1;
+    let totalPages = 1;
+
+    function saveTranslationScroll() {
+      try { localStorage.setItem(storageKey, String(content.scrollTop)); } catch (_) {}
+    }
+
+    function restoreTranslationScroll() {
+      let saved = 0;
+      try { saved = Number(localStorage.getItem(storageKey) || 0); } catch (_) {}
+      if (Number.isFinite(saved) && saved > 0) content.scrollTop = saved;
+    }
+
+    function updatePage(page, total) {
+      currentPage = Math.max(1, Number(page) || 1);
+      totalPages = Math.max(1, Number(total) || 1);
+      if (pageLabel) pageLabel.textContent = 'Current Arabic page · ' + currentPage + ' of ' + totalPages;
+      button.setAttribute('aria-label', 'Open English translation · Arabic page ' + currentPage + ' of ' + totalPages);
+    }
 
     function closePanel() {
+      saveTranslationScroll();
       open = false;
       panel.classList.remove('is-open');
       overlay.classList.remove('is-open');
@@ -288,6 +352,7 @@
       requestAnimationFrame(function () {
         panel.classList.add('is-open');
         overlay.classList.add('is-open');
+        if (loaded) restoreTranslationScroll();
       });
       panel.setAttribute('aria-hidden', 'false');
       button.setAttribute('aria-expanded', 'true');
@@ -325,6 +390,7 @@
         });
         content.appendChild(fragment);
         loaded = true;
+        requestAnimationFrame(restoreTranslationScroll);
       } catch (_) {
         content.innerHTML = '<p class="translation-empty">The translation could not be loaded. Please reconnect to the internet and try again.</p>';
       } finally {
@@ -335,9 +401,18 @@
     button.addEventListener('click', function () { open ? closePanel() : openPanel(); });
     close.addEventListener('click', closePanel);
     overlay.addEventListener('click', closePanel);
+    content.addEventListener('scroll', function () {
+      if (open) window.clearTimeout(content._saveTimer);
+      content._saveTimer = window.setTimeout(saveTranslationScroll, 180);
+    }, { passive: true });
     document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && open) closePanel();
     });
+    window.addEventListener('hizbulAzam:pagechange', function (event) {
+      if (!event.detail || event.detail.day !== day) return;
+      updatePage(event.detail.page, event.detail.total);
+    });
+    updatePage(1, Number(document.getElementById('total-pages')?.textContent) || 1);
   }
 
   function setupFullscreen() {
@@ -408,7 +483,7 @@
         }, [messageChannel.port2]);
       });
 
-      const cache = await caches.open('hizbul-azam-content-v6');
+      const cache = await caches.open('hizbul-azam-content-v10');
       const pdfCached = await cache.match(new URL(pdfUrl, location.href).href);
       const audioCached = await cache.match(new URL(audioUrl, location.href).href);
       const translationCached = await cache.match(new URL('translations/' + day + '.json', location.href).href);
@@ -419,7 +494,7 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=9').catch(function () {});
+      navigator.serviceWorker.register('./sw.js?v=10', { updateViaCache: 'none' }).catch(function () {});
     });
   }
 

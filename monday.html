@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f4ec">
   <title>Monday — Hizbul-Azam</title>
-  <link rel="stylesheet" href="style.css?v=9">
-  <link rel="manifest" href="manifest.webmanifest?v=9">
-  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="manifest" href="manifest.webmanifest?v=10">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32-v2.png?v=10">
+  <link rel="apple-touch-icon" href="icons/icon-192-v2.png?v=10">
   <script>try{var t=localStorage.getItem("hizbulAzam:theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t;}catch(e){}</script>
-  <script src="app.js?v=9" defer></script>
+  <script src="app.js?v=10" defer></script>
   <script src="pdf-viewer.js" defer></script>
 </head>
 <body class="page">
@@ -33,7 +34,6 @@
         <p class="reader-help"><span id="current-page">1</span> / <span id="total-pages">—</span> pages</p>
         <div class="reader-tools" aria-label="Reader controls">
           <button id="offline-control" class="reader-tool" type="button">Save offline</button>
-          <button id="translation-control" class="reader-tool translation-trigger" type="button" aria-expanded="false" aria-controls="translation-panel">Translation</button>
           <button id="focus-control" class="reader-tool desktop-tool" type="button">Focus</button>
         </div>
       </div>
@@ -87,6 +87,7 @@
         </audio>
       </div>
       <div class="audio-extra" aria-label="Playback controls">
+        <button id="translation-control" class="translation-player-control" type="button" aria-expanded="false" aria-controls="translation-panel" aria-label="Open English translation">Translation</button>
         <button id="speed-control" class="speed-control" type="button" aria-label="Playback speed 1 times. Tap to change.">1×</button>
       </div>
     </div>
