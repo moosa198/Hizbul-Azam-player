@@ -14,3 +14,6 @@ This package includes the complete Hizbul-Azam site.
 
 ## Upload
 Replace the contents of the existing GitHub Pages site with the contents of this folder, including `audio/`, `pdfs/`, `icons/`, and `translations/`.
+
+
+Hizbul-Azam Translation v9 — UX fixes: translation control is present in the HTML (not injected only by JS), with explicit dark-mode styling for the translation control and playback-speed button. Asset/cache versions bumped to v9.

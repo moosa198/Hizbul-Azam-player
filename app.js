@@ -235,13 +235,10 @@
     const day = viewer.dataset.day;
     if (!day) return;
 
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'reader-tool translation-trigger';
-    button.textContent = 'Translation';
-    button.setAttribute('aria-expanded', 'false');
-    button.setAttribute('aria-controls', 'translation-panel');
-    tools.insertBefore(button, tools.firstChild);
+    // Keep the control in the HTML so it is visible even if another script
+    // fails. JS only wires it up and creates the panel here.
+    const button = document.getElementById('translation-control');
+    if (!button) return;
 
     const overlay = document.createElement('div');
     overlay.className = 'translation-overlay';
@@ -271,6 +268,7 @@
     const content = panel.querySelector('#translation-content');
     const close = panel.querySelector('.translation-close');
     let loaded = false;
+    let loading = false;
     let open = false;
 
     function closePanel() {
@@ -279,6 +277,7 @@
       overlay.classList.remove('is-open');
       panel.setAttribute('aria-hidden', 'true');
       button.setAttribute('aria-expanded', 'false');
+      button.classList.remove('is-active');
       setTimeout(function () { if (!open) overlay.hidden = true; }, 220);
       document.body.classList.remove('translation-open');
     }
@@ -292,11 +291,13 @@
       });
       panel.setAttribute('aria-hidden', 'false');
       button.setAttribute('aria-expanded', 'true');
+      button.classList.add('is-active');
       document.body.classList.add('translation-open');
-      if (!loaded) loadTranslation();
+      if (!loaded && !loading) loadTranslation();
     }
 
     async function loadTranslation() {
+      loading = true;
       try {
         const response = await fetch('translations/' + day + '.json', { cache: 'default' });
         if (!response.ok) throw new Error('Translation unavailable');
@@ -326,6 +327,8 @@
         loaded = true;
       } catch (_) {
         content.innerHTML = '<p class="translation-empty">The translation could not be loaded. Please reconnect to the internet and try again.</p>';
+      } finally {
+        loading = false;
       }
     }
 
@@ -416,7 +419,7 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=8').catch(function () {});
+      navigator.serviceWorker.register('./sw.js?v=9').catch(function () {});
     });
   }
 
