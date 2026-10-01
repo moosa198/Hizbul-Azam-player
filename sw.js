@@ -1,8 +1,9 @@
 const SHELL_CACHE = 'hizbul-azam-shell-v6';
 const CONTENT_CACHE = 'hizbul-azam-content-v6';
 const SHELL = [
-  './', './index.html', './style.css?v=8', './app.js?v=8', './pdf-viewer.js', './manifest.webmanifest?v=8',
-  './icons/icon-192-v2.png', './icons/icon-512-v2.png', './icons/favicon-32-v2.png',
+  './', './index.html', './style.css?v=8', './app.js?v=8', './pdf-viewer.js', './manifest.webmanifest',
+  './icons/icon-192.png', './icons/icon-512.png',
+  './translations/saturday.json', './translations/sunday.json', './translations/monday.json', './translations/tuesday.json', './translations/wednesday.json', './translations/thursday.json', './translations/friday.json',
   './saturday.html', './sunday.html', './monday.html', './tuesday.html',
   './wednesday.html', './thursday.html', './friday.html'
 ];
@@ -44,7 +45,7 @@ self.addEventListener('fetch', event => {
 
   // Keep same-origin app/content available offline.
   if (url.origin === self.location.origin) {
-    if (url.pathname.includes('/pdfs/') || url.pathname.includes('/audio/')) {
+    if (url.pathname.includes('/pdfs/') || url.pathname.includes('/audio/') || url.pathname.includes('/translations/')) {
       event.respondWith(
         caches.open(CONTENT_CACHE).then(cache =>
           cache.match(request).then(cached => cached || fetch(request).then(response => {

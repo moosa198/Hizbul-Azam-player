@@ -227,6 +227,116 @@
     });
   }
 
+  async function setupTranslation() {
+    const tools = document.querySelector('.reader-tools');
+    const viewer = document.getElementById('pdf-viewer');
+    if (!tools || !viewer) return;
+
+    const day = viewer.dataset.day;
+    if (!day) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'reader-tool translation-trigger';
+    button.textContent = 'Translation';
+    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-controls', 'translation-panel');
+    tools.insertBefore(button, tools.firstChild);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'translation-overlay';
+    overlay.hidden = true;
+
+    const panel = document.createElement('aside');
+    panel.className = 'translation-panel';
+    panel.id = 'translation-panel';
+    panel.setAttribute('aria-label', 'English translation');
+    panel.setAttribute('aria-hidden', 'true');
+    panel.innerHTML = `
+      <div class="translation-panel-header">
+        <div>
+          <p class="translation-kicker">Translation</p>
+          <h2>English</h2>
+        </div>
+        <button type="button" class="translation-close" aria-label="Close translation">×</button>
+      </div>
+      <p class="translation-source">English translation from the supplied bilingual edition.</p>
+      <div class="translation-content" id="translation-content">
+        <p class="translation-loading">Loading translation…</p>
+      </div>`;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+
+    const content = panel.querySelector('#translation-content');
+    const close = panel.querySelector('.translation-close');
+    let loaded = false;
+    let open = false;
+
+    function closePanel() {
+      open = false;
+      panel.classList.remove('is-open');
+      overlay.classList.remove('is-open');
+      panel.setAttribute('aria-hidden', 'true');
+      button.setAttribute('aria-expanded', 'false');
+      setTimeout(function () { if (!open) overlay.hidden = true; }, 220);
+      document.body.classList.remove('translation-open');
+    }
+
+    function openPanel() {
+      open = true;
+      overlay.hidden = false;
+      requestAnimationFrame(function () {
+        panel.classList.add('is-open');
+        overlay.classList.add('is-open');
+      });
+      panel.setAttribute('aria-hidden', 'false');
+      button.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('translation-open');
+      if (!loaded) loadTranslation();
+    }
+
+    async function loadTranslation() {
+      try {
+        const response = await fetch('translations/' + day + '.json', { cache: 'default' });
+        if (!response.ok) throw new Error('Translation unavailable');
+        const data = await response.json();
+        const items = Array.isArray(data.items) ? data.items : [];
+        content.innerHTML = '';
+        if (!items.length) {
+          content.innerHTML = '<p class="translation-empty">Translation is not available for this portion yet.</p>';
+          return;
+        }
+        const fragment = document.createDocumentFragment();
+        items.forEach(function (item) {
+          const article = document.createElement('article');
+          article.className = 'translation-entry';
+          const text = document.createElement('p');
+          text.textContent = item.text || '';
+          article.appendChild(text);
+          if (Array.isArray(item.references) && item.references.length) {
+            const refs = document.createElement('p');
+            refs.className = 'translation-reference';
+            refs.textContent = 'References · ' + item.references.join(' · ');
+            article.appendChild(refs);
+          }
+          fragment.appendChild(article);
+        });
+        content.appendChild(fragment);
+        loaded = true;
+      } catch (_) {
+        content.innerHTML = '<p class="translation-empty">The translation could not be loaded. Please reconnect to the internet and try again.</p>';
+      }
+    }
+
+    button.addEventListener('click', function () { open ? closePanel() : openPanel(); });
+    close.addEventListener('click', closePanel);
+    overlay.addEventListener('click', closePanel);
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && open) closePanel();
+    });
+  }
+
   function setupFullscreen() {
     const button = document.getElementById('focus-control');
     if (!button) return;
@@ -289,7 +399,8 @@
             pdfUrl,
             audioUrl,
             'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+            'translations/' + day + '.json'
           ]
         }, [messageChannel.port2]);
       });
@@ -297,7 +408,8 @@
       const cache = await caches.open('hizbul-azam-content-v6');
       const pdfCached = await cache.match(new URL(pdfUrl, location.href).href);
       const audioCached = await cache.match(new URL(audioUrl, location.href).href);
-      if (pdfCached && audioCached) setState('Available without internet', true);
+      const translationCached = await cache.match(new URL('translations/' + day + '.json', location.href).href);
+      if (pdfCached && audioCached && translationCached) setState('Available without internet', true);
     } catch (_) {}
   }
 
@@ -312,6 +424,7 @@
   setupAudio();
   setupContinueCard();
   setupInstall();
+  setupTranslation();
   setupFullscreen();
   setupOffline();
   registerServiceWorker();

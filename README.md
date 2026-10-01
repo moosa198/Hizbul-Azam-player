@@ -1,14 +1,16 @@
-# Hizbul-Azam — v7
+# Hizbul-Azam — v8
 
 This package includes the complete Hizbul-Azam site.
 
-## v7 additions
-- Light/dark mode toggle across the site.
-- Dark mode dynamically transforms PDF.js-rendered PDF pages; no duplicate dark PDFs are required.
-- Theme preference is remembered on the device.
-- PDF colour treatment preserves the warm ivory text and botanical green/gold accents as far as possible.
+## v8 additions
+- Optional English translation on every daily reading page.
+- Translation opens as a discreet side drawer on desktop and a bottom sheet on mobile, so the Arabic PDF remains the primary reading experience.
+- The Arabic PDF is unchanged; translation is a separate content layer rather than a second PDF.
+- English is extracted and cleaned from the user-supplied bilingual Hizbul-Azam edition.
+- References contained in the supplied translation are retained where they can be cleanly identified.
+- Translation files are cached with the site's offline content, so a saved day can be read with its English translation without internet access.
 - Updated service-worker and asset cache versions.
-- Offline saving continues to cache the selected day's PDF and audio.
+- Existing light/dark mode and PDF.js dark-reading treatment are retained.
 
 ## Upload
-Replace the contents of the existing GitHub Pages site with the contents of this folder, including `audio/`, `pdfs/`, and `icons/`.
+Replace the contents of the existing GitHub Pages site with the contents of this folder, including `audio/`, `pdfs/`, `icons/`, and `translations/`.
