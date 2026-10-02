@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="72" fill="#f6f3eb"/>
+<path d="M82 191 C122 82 390 82 430 191" fill="none" stroke="#2b302e" stroke-width="16" stroke-linecap="round"/>
+<path d="M112 178 C150 105 362 105 400 178" fill="none" stroke="#2b302e" stroke-width="7" stroke-linecap="round"/>
+<text x="256" y="282" text-anchor="middle" direction="rtl" unicode-bidi="bidi-override" font-family="Noto Naskh Arabic, Noto Sans Arabic, serif" font-size="78" font-weight="700" fill="#232826">الحزب الأعظم</text>
+<path d="M145 365 C200 314 312 314 367 365" fill="none" stroke="#2b302e" stroke-width="9" stroke-linecap="round"/>
+</svg>
