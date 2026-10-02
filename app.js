@@ -17,8 +17,8 @@
   function setupAutoScroll() {
     const audio = document.querySelector('audio[data-day]');
     const viewer = document.getElementById('pdf-viewer');
-    const extra = document.querySelector('.audio-extra');
-    if (!audio || !viewer || !extra) return;
+    const tools = document.querySelector('.reader-tools');
+    if (!audio || !viewer || !tools) return;
 
     const key = STORAGE_PREFIX + 'autoScroll';
     let enabled = false;
@@ -30,36 +30,50 @@
 
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'auto-scroll-control';
+    button.className = 'reader-tool auto-scroll-control';
     button.setAttribute('aria-pressed', 'false');
     button.title = 'Keep the reader aligned with the audio';
-    extra.insertBefore(button, extra.firstChild);
+    tools.insertBefore(button, tools.querySelector('#focus-control') || null);
 
     function setButton() {
       button.textContent = userPaused ? 'Resume sync' : (enabled ? 'Auto-scroll ✓' : 'Auto-scroll');
       button.setAttribute('aria-pressed', String(enabled && !userPaused));
-      button.setAttribute('aria-label', userPaused ? 'Resume audio-synced scrolling' : (enabled ? 'Turn off audio-synced scrolling' : 'Turn on audio-synced scrolling'));
+      button.setAttribute(
+        'aria-label',
+        userPaused
+          ? 'Resume audio-synced scrolling'
+          : (enabled ? 'Turn off audio-synced scrolling' : 'Turn on audio-synced scrolling')
+      );
       button.classList.toggle('is-active', enabled && !userPaused);
     }
 
     function pages() {
-      return Array.from(viewer.querySelectorAll('.pdf-page-wrap'));
+      // Every Hizbul-Azam PDF has a cover page at index 0. It is deliberately
+      // excluded from audio synchronisation so the cover cannot offset the reading.
+      return Array.from(viewer.querySelectorAll('.pdf-page-wrap')).slice(1);
     }
 
     function scrollToAudio() {
       if (!enabled || userPaused || audio.paused || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
-      const all = pages();
-      if (!all.length) return;
+
+      const contentPages = pages();
+      if (!contentPages.length) return;
+
       const ratio = Math.max(0, Math.min(1, audio.currentTime / audio.duration));
-      const target = Math.min(all.length - 1, Math.floor(ratio * all.length));
-      const page = all[target];
+      const position = ratio * contentPages.length;
+      const target = Math.min(contentPages.length - 1, Math.floor(position));
+      const page = contentPages[target];
       if (!page) return;
 
       programmatic = true;
+
       const pageTop = page.getBoundingClientRect().top + window.scrollY;
       const pageHeight = Math.max(page.offsetHeight, 1);
-      const within = (ratio * all.length) - target;
-      const y = pageTop + Math.min(.92, Math.max(0, within)) * pageHeight - Math.min(window.innerHeight * .28, 220);
+      const within = position - target;
+      const y = pageTop
+        + Math.min(.92, Math.max(0, within)) * pageHeight
+        - Math.min(window.innerHeight * .28, 220);
+
       window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
       window.setTimeout(function () { programmatic = false; }, 180);
     }
@@ -79,11 +93,14 @@
       } else {
         enabled = !enabled;
       }
+
       try { localStorage.setItem(key, String(enabled)); } catch (_) {}
       setButton();
       if (enabled) schedule();
     });
 
+    // Manual scrolling pauses sync rather than fighting the reader. The user
+    // can resume it with the same button at any time.
     window.addEventListener('scroll', function () {
       if (!enabled || programmatic || userPaused) return;
       userPaused = true;
@@ -91,7 +108,9 @@
     }, { passive: true });
 
     audio.addEventListener('timeupdate', schedule);
-    audio.addEventListener('play', function () { if (enabled && !userPaused) schedule(); });
+    audio.addEventListener('play', function () {
+      if (enabled && !userPaused) schedule();
+    });
 
     const observer = new MutationObserver(function () {
       if (enabled && !userPaused) schedule();
