@@ -13,6 +13,95 @@
   }
 
 
+
+  function setupAutoScroll() {
+    const audio = document.querySelector('audio[data-day]');
+    const viewer = document.getElementById('pdf-viewer');
+    const extra = document.querySelector('.audio-extra');
+    if (!audio || !viewer || !extra) return;
+
+    const key = STORAGE_PREFIX + 'autoScroll';
+    let enabled = false;
+    let userPaused = false;
+    let programmatic = false;
+    let raf = 0;
+
+    try { enabled = localStorage.getItem(key) === 'true'; } catch (_) {}
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'auto-scroll-control';
+    button.setAttribute('aria-pressed', 'false');
+    button.title = 'Keep the reader aligned with the audio';
+    extra.insertBefore(button, extra.firstChild);
+
+    function setButton() {
+      button.textContent = userPaused ? 'Resume sync' : (enabled ? 'Auto-scroll ✓' : 'Auto-scroll');
+      button.setAttribute('aria-pressed', String(enabled && !userPaused));
+      button.setAttribute('aria-label', userPaused ? 'Resume audio-synced scrolling' : (enabled ? 'Turn off audio-synced scrolling' : 'Turn on audio-synced scrolling'));
+      button.classList.toggle('is-active', enabled && !userPaused);
+    }
+
+    function pages() {
+      return Array.from(viewer.querySelectorAll('.pdf-page-wrap'));
+    }
+
+    function scrollToAudio() {
+      if (!enabled || userPaused || audio.paused || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
+      const all = pages();
+      if (!all.length) return;
+      const ratio = Math.max(0, Math.min(1, audio.currentTime / audio.duration));
+      const target = Math.min(all.length - 1, Math.floor(ratio * all.length));
+      const page = all[target];
+      if (!page) return;
+
+      programmatic = true;
+      const pageTop = page.getBoundingClientRect().top + window.scrollY;
+      const pageHeight = Math.max(page.offsetHeight, 1);
+      const within = (ratio * all.length) - target;
+      const y = pageTop + Math.min(.92, Math.max(0, within)) * pageHeight - Math.min(window.innerHeight * .28, 220);
+      window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+      window.setTimeout(function () { programmatic = false; }, 180);
+    }
+
+    function schedule() {
+      if (raf) return;
+      raf = window.requestAnimationFrame(function () {
+        raf = 0;
+        scrollToAudio();
+      });
+    }
+
+    button.addEventListener('click', function () {
+      if (userPaused) {
+        userPaused = false;
+        enabled = true;
+      } else {
+        enabled = !enabled;
+      }
+      try { localStorage.setItem(key, String(enabled)); } catch (_) {}
+      setButton();
+      if (enabled) schedule();
+    });
+
+    window.addEventListener('scroll', function () {
+      if (!enabled || programmatic || userPaused) return;
+      userPaused = true;
+      setButton();
+    }, { passive: true });
+
+    audio.addEventListener('timeupdate', schedule);
+    audio.addEventListener('play', function () { if (enabled && !userPaused) schedule(); });
+
+    const observer = new MutationObserver(function () {
+      if (enabled && !userPaused) schedule();
+    });
+    observer.observe(viewer, { childList: true });
+
+    setButton();
+    if (enabled) window.setTimeout(schedule, 700);
+  }
+
   function setupTheme() {
     const root = document.documentElement;
     const key = STORAGE_PREFIX + 'theme';
@@ -26,7 +115,7 @@
 
     const meta = document.querySelector('meta[name="theme-color"]');
     const updateMeta = () => {
-      if (meta) meta.setAttribute('content', root.dataset.theme === 'dark' ? '#151f1a' : '#f7f4ec');
+      if (meta) meta.setAttribute('content', root.dataset.theme === 'dark' ? '#17191c' : '#f6f3eb');
     };
 
     const host = document.querySelector('.home-header') || document.querySelector('.topbar');
@@ -483,7 +572,7 @@
         }, [messageChannel.port2]);
       });
 
-      const cache = await caches.open('hizbul-azam-content-v10');
+      const cache = await caches.open('hizbul-azam-content-v11');
       const pdfCached = await cache.match(new URL(pdfUrl, location.href).href);
       const audioCached = await cache.match(new URL(audioUrl, location.href).href);
       const translationCached = await cache.match(new URL('translations/' + day + '.json', location.href).href);
@@ -494,12 +583,13 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=10', { updateViaCache: 'none' }).catch(function () {});
+      navigator.serviceWorker.register('./sw.js?v=11', { updateViaCache: 'none' }).catch(function () {});
     });
   }
 
   setupTheme();
   setupAudio();
+  setupAutoScroll();
   setupContinueCard();
   setupInstall();
   setupTranslation();
