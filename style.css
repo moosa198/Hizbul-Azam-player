@@ -861,10 +861,10 @@ audio {
   .day-action { min-height: 38px; padding: 7px 9px; font-size: .76rem; }
 
   .player {
-    padding: 6px 9px calc(7px + env(safe-area-inset-bottom));
-    border-top: 1px solid rgba(217,213,200,.9);
-    background: rgba(247,244,236,.96);
-    box-shadow: 0 -5px 18px rgba(31,54,42,.08);
+    padding: 7px 9px calc(8px + env(safe-area-inset-bottom));
+    border-top: 2px solid var(--green-900);
+    background: rgba(255,253,248,.98);
+    box-shadow: 0 -7px 24px rgba(31,54,42,.16), 0 -1px 0 rgba(184,154,90,.45);
     color: var(--ink);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -881,16 +881,20 @@ audio {
   .audio-progress-wrap { flex: 1 1 auto; min-width: 0; }
   .audio-progress-shell { height: 30px; }
   .audio-progress { height: 30px; }
-  .audio-progress-track { height: 5px; }
-  .audio-progress-thumb { width: 14px; height: 14px; }
+  .audio-progress-track { height: 6px; background: rgba(38,55,47,.28); }
+  .audio-progress-fill { background: var(--green-900); }
+  .audio-progress-thumb { width: 15px; height: 15px; border-color: var(--green-900); background: var(--gold-soft); box-shadow: 0 1px 6px rgba(31,54,42,.24); }
+  .play-control { width: 36px; height: 36px; border: 2px solid var(--green-900); background: var(--green-900); color: #fffdf8; box-shadow: 0 2px 7px rgba(31,54,42,.18); }
+  .play-control:hover { background: var(--green-950); border-color: var(--green-950); }
   .audio-extra { flex: 0 0 auto; margin-left: auto; order: 3; display: flex; gap: 5px; }
   .translation-player-control {
     min-width: 74px;
     height: 30px;
     padding: 0 7px;
-    border-color: rgba(38,55,47,.22);
-    background: rgba(255,253,248,.72);
+    border-color: rgba(23,76,58,.38);
+    background: var(--paper);
     color: var(--green-800);
+    box-shadow: 0 1px 4px rgba(31,54,42,.08);
   }
   .translation-player-control:hover,
   .translation-player-control.is-active {
