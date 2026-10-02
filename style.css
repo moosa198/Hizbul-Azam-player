@@ -1214,43 +1214,22 @@ body.translation-open { overflow: hidden; }
 /* Audio-synced scrolling control */
 .auto-scroll-control {
   min-width: 92px;
-  height: 30px;
-  padding: 0 9px;
-  border: 1px solid rgba(215,197,150,.55);
-  border-radius: 5px;
-  background: transparent;
-  color: #fffdf8;
-  font-size: .68rem;
-  font-weight: 600;
-  cursor: pointer;
 }
-.auto-scroll-control:hover,
+
 .auto-scroll-control.is-active {
-  background: rgba(255,253,248,.10);
-  border-color: rgba(215,197,150,.85);
-}
-:root[data-theme="dark"] .auto-scroll-control {
-  border-color: rgba(220,203,155,.48);
-  background: rgba(36,39,43,.92);
-  color: var(--gold-soft);
-}
-:root[data-theme="dark"] .auto-scroll-control:hover,
-:root[data-theme="dark"] .auto-scroll-control.is-active {
-  background: #30343a;
   border-color: var(--gold);
+  color: var(--green-950);
+  background: rgba(184,154,90,.12);
 }
+
+:root[data-theme="dark"] .auto-scroll-control.is-active {
+  border-color: var(--gold);
+  color: var(--gold-soft);
+  background: #30343a;
+}
+
 @media (max-width: 800px) {
   .auto-scroll-control {
     min-width: 84px;
-    height: 30px;
-    padding: 0 7px;
-    border-color: rgba(38,43,48,.22);
-    background: rgba(255,253,248,.72);
-    color: var(--green-800);
-  }
-  :root[data-theme="dark"] .auto-scroll-control {
-    border-color: rgba(220,203,155,.48);
-    background: rgba(36,39,43,.92);
-    color: var(--gold-soft);
   }
 }
