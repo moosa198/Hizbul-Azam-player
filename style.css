@@ -1,4 +1,4 @@
-/* Hizbul-Azam — traditional Islamic editorial theme — v14 */
+/* Hizbul-Azam — traditional Islamic editorial theme — v15 */
 
 :root {
   --ivory: #f7f4ec;
@@ -674,7 +674,7 @@ audio {
 .desktop-audio-controls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   min-width: 0;
 }
 
@@ -1240,5 +1240,73 @@ body.translation-open { overflow: hidden; }
 @media (max-width: 800px) {
   .auto-scroll-control {
     min-width: 84px;
+  }
+}
+
+
+/* v15 audio UX */
+.restart-control {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(215,197,150,.55);
+  border-radius: 50%;
+  background: transparent;
+  color: #fffdf8;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.restart-control:hover { background: rgba(255,253,248,.10); }
+.audio-extra { position: relative; }
+.speed-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  z-index: 50;
+  display: grid;
+  gap: 2px;
+  min-width: 82px;
+  padding: 5px;
+  border: 1px solid rgba(215,197,150,.45);
+  border-radius: 7px;
+  background: rgba(23,76,58,.98);
+  box-shadow: 0 8px 22px rgba(0,0,0,.20);
+}
+.speed-menu[hidden] { display: none; }
+.speed-option {
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #fffdf8;
+  font-size: .72rem;
+  text-align: left;
+}
+.speed-option:hover,
+.speed-option[aria-checked="true"] { background: rgba(255,253,248,.12); }
+@media (max-width: 800px) {
+  .desktop-audio-controls { gap: 16px; }
+  .restart-control {
+    width: 32px;
+    height: 32px;
+    border-color: rgba(38,55,47,.28);
+    background: rgba(255,253,248,.72);
+    color: var(--green-800);
+  }
+  .restart-control:hover { background: rgba(255,253,248,.95); }
+  .speed-menu {
+    background: rgba(255,253,248,.99);
+    border-color: rgba(38,55,47,.18);
+    box-shadow: 0 8px 22px rgba(31,54,42,.18);
+  }
+  .speed-option { color: var(--green-800); }
+  .speed-option:hover,
+  .speed-option[aria-checked="true"] {
+    background: rgba(23,76,58,.08);
+    color: var(--green-950);
   }
 }
