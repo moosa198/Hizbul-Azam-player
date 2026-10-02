@@ -22,9 +22,15 @@
 
     const day = audio.dataset.day;
     const key = STORAGE_PREFIX + 'autoScroll';
+    const START_DELAY = 5000;
     let enabled = false;
     let raf = 0;
     let wakeLock = null;
+    let delayUntil = 0;
+    let scrollStart = null;
+    let scrollEnd = null;
+    let lastScrollHeight = 0;
+    let currentY = null;
 
     try { enabled = localStorage.getItem(key) === 'true'; } catch (_) {}
 
@@ -38,12 +44,9 @@
     function setButton() {
       button.textContent = enabled ? 'Auto-scroll ✓' : 'Auto-scroll';
       button.setAttribute('aria-pressed', String(enabled));
-      button.setAttribute(
-        'aria-label',
-        enabled
-          ? 'Turn off continuous audio scrolling'
-          : 'Turn on continuous audio scrolling'
-      );
+      button.setAttribute('aria-label', enabled
+        ? 'Turn off continuous audio scrolling'
+        : 'Turn on continuous audio scrolling');
       button.classList.toggle('is-active', enabled);
     }
 
@@ -56,9 +59,7 @@
       try {
         if (wakeLock && wakeLock.released === false) return;
         wakeLock = await navigator.wakeLock.request('screen');
-        wakeLock.addEventListener('release', function () {
-          wakeLock = null;
-        });
+        wakeLock.addEventListener('release', function () { wakeLock = null; });
       } catch (_) {
         wakeLock = null;
       }
@@ -70,57 +71,108 @@
       wakeLock = null;
     }
 
-    function scrollToAudio() {
-      if (!enabled || audio.paused || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
-
+    function getInitialScrollTop() {
       const contentPages = pages();
-      if (!contentPages.length) return;
+      if (!contentPages.length) return window.scrollY;
 
-      const ratio = Math.max(0, Math.min(1, audio.currentTime / audio.duration));
       const startIndex = day === 'friday' ? 2 : 1;
-      const safeStart = Math.min(startIndex, Math.max(0, contentPages.length - 1));
-      const available = Math.max(0, contentPages.length - 1 - safeStart);
-      const position = safeStart + ratio * available;
-      const target = Math.min(contentPages.length - 1, Math.floor(position));
-      const page = contentPages[target];
-      if (!page) return;
+      const page = contentPages[Math.min(startIndex, contentPages.length - 1)];
+      if (!page) return window.scrollY;
 
-      const pageTop = page.getBoundingClientRect().top + window.scrollY;
-      const pageHeight = Math.max(page.offsetHeight, 1);
-      const within = position - target;
+      const rect = page.getBoundingClientRect();
+      return Math.max(0, rect.top + window.scrollY + rect.height / 2 - window.innerHeight / 2);
+    }
 
-      // At the beginning, place page 2 (or Friday page 3) in the middle of
-      // the phone screen. Thereafter the reading position moves continuously.
-      let y;
-      if (ratio < 0.001) {
-        y = pageTop + pageHeight / 2 - window.innerHeight / 2;
+    function resetScrollPlan() {
+      scrollStart = null;
+      scrollEnd = null;
+      currentY = null;
+      lastScrollHeight = 0;
+    }
+
+    function initialiseScrollPlan() {
+      if (!Number.isFinite(audio.duration) || audio.duration <= 0) return false;
+
+      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      scrollStart = getInitialScrollTop();
+      scrollEnd = maxScroll;
+      lastScrollHeight = document.documentElement.scrollHeight;
+      currentY = scrollStart;
+      window.scrollTo({ top: scrollStart, behavior: 'auto' });
+      return true;
+    }
+
+    function updateScrollEndIfLayoutChanged() {
+      const height = document.documentElement.scrollHeight;
+      if (!scrollStart || !lastScrollHeight) return;
+      if (Math.abs(height - lastScrollHeight) < 80) return;
+
+      const previousMax = Math.max(0, lastScrollHeight - window.innerHeight);
+      const newMax = Math.max(0, height - window.innerHeight);
+      if (previousMax > 0 && scrollEnd !== null) {
+        const travelled = Math.max(0, Math.min(1, (currentY - scrollStart) / Math.max(1, scrollEnd - scrollStart)));
+        scrollEnd = scrollStart + travelled * Math.max(0, newMax - scrollStart);
       } else {
-        y = pageTop + Math.min(.98, Math.max(0, within)) * pageHeight
-          - Math.min(window.innerHeight * .38, 300);
+        scrollEnd = newMax;
+      }
+      lastScrollHeight = height;
+    }
+
+    function tick() {
+      raf = 0;
+      if (!enabled || audio.paused || audio.ended) return;
+
+      const now = performance.now();
+      if (now < delayUntil) {
+        raf = window.requestAnimationFrame(tick);
+        return;
       }
 
-      window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+      if (scrollStart === null) {
+        if (!initialiseScrollPlan()) {
+          raf = window.requestAnimationFrame(tick);
+          return;
+        }
+      }
+
+      updateScrollEndIfLayoutChanged();
+
+      const duration = Math.max(0.001, audio.duration);
+      const progress = Math.max(0, Math.min(1, audio.currentTime / duration));
+      const targetY = scrollStart + progress * Math.max(0, scrollEnd - scrollStart);
+
+      // Smoothly follow the time-derived position instead of recalculating
+      // page coordinates every frame. This avoids jumps when PDF pages render.
+      const smoothing = 0.12;
+      currentY += (targetY - currentY) * smoothing;
+
+      if (Math.abs(targetY - currentY) < 0.35) currentY = targetY;
+      window.scrollTo({ top: Math.max(0, currentY), behavior: 'auto' });
+
+      raf = window.requestAnimationFrame(tick);
     }
 
     function schedule() {
       if (!enabled || audio.paused || raf) return;
-      raf = window.requestAnimationFrame(function tick() {
-        raf = 0;
-        if (!enabled || audio.paused) return;
-        scrollToAudio();
-        schedule();
-      });
+      raf = window.requestAnimationFrame(tick);
+    }
+
+    function beginDelayedScroll() {
+      resetScrollPlan();
+      delayUntil = performance.now() + START_DELAY;
+      schedule();
     }
 
     async function syncPlaybackState() {
       if (enabled && !audio.paused && !audio.ended) {
         await requestWakeLock();
-        schedule();
+        beginDelayedScroll();
       } else {
         if (raf) {
           window.cancelAnimationFrame(raf);
           raf = 0;
         }
+        resetScrollPlan();
         await releaseWakeLock();
       }
     }
@@ -131,14 +183,16 @@
       setButton();
 
       if (enabled) {
-        await requestWakeLock();
-        if (!audio.paused) schedule();
-        else scrollToAudio();
+        if (!audio.paused) {
+          await requestWakeLock();
+          beginDelayedScroll();
+        }
       } else {
         if (raf) {
           window.cancelAnimationFrame(raf);
           raf = 0;
         }
+        resetScrollPlan();
         await releaseWakeLock();
       }
     });
@@ -146,17 +200,25 @@
     audio.addEventListener('play', syncPlaybackState);
     audio.addEventListener('pause', syncPlaybackState);
     audio.addEventListener('ended', syncPlaybackState);
-    audio.addEventListener('timeupdate', function () {
-      if (enabled && !audio.paused && !raf) schedule();
+
+    audio.addEventListener('seeking', function () {
+      if (enabled && !audio.paused) {
+        resetScrollPlan();
+        delayUntil = performance.now() + 500;
+        schedule();
+      }
     });
 
     document.addEventListener('visibilitychange', function () {
       if (document.visibilityState === 'visible' && enabled && !audio.paused) {
         requestWakeLock();
-        schedule();
+        if (!raf) schedule();
       }
     });
 
+    // PDF rendering can change document height. We only adapt the destination
+    // range when that height changes materially; we never chase individual page
+    // positions, which is what caused the previous random-looking jumps.
     const observer = new MutationObserver(function () {
       if (enabled && !audio.paused) schedule();
     });
@@ -165,7 +227,7 @@
     setButton();
     if (enabled && !audio.paused) {
       requestWakeLock();
-      schedule();
+      beginDelayedScroll();
     }
   }
 
@@ -215,14 +277,17 @@
     updateMeta();
   }
 
+  const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+
   function getSpeed() {
     const speed = Number(localStorage.getItem(speedKey));
-    return [1, 1.5, 2].includes(speed) ? speed : 1;
+    return SPEEDS.includes(speed) ? speed : 1;
   }
 
   function setSpeed(speed) {
-    localStorage.setItem(speedKey, String(speed));
+    try { localStorage.setItem(speedKey, String(speed)); } catch (_) {}
   }
+
 
   function setupAudio() {
     const audio = document.querySelector('audio[data-day]');
@@ -317,15 +382,69 @@
       });
     }
 
-    if (speedButton) {
-      speedButton.addEventListener('click', function () {
-        const current = audio.playbackRate;
-        const next = current === 1 ? 1.5 : current === 1.5 ? 2 : 1;
-        audio.playbackRate = next;
-        setSpeed(next);
-        speedButton.textContent = next + '×';
-        speedButton.setAttribute('aria-label', 'Playback speed ' + next + ' times. Tap to change.');
+    // A dedicated restart control is easier to discover and use than relying
+    // on dragging the progress thumb all the way back to zero.
+    if (playButton) {
+      const restartButton = document.createElement('button');
+      restartButton.type = 'button';
+      restartButton.className = 'restart-control';
+      restartButton.textContent = '↺';
+      restartButton.setAttribute('aria-label', 'Restart audio from the beginning');
+      restartButton.title = 'Restart audio';
+      playButton.insertAdjacentElement('afterend', restartButton);
+
+      restartButton.addEventListener('click', function () {
+        audio.currentTime = 0;
+        try { localStorage.removeItem(positionKey); } catch (_) {}
+        updateProgress();
+        if (audio.paused) audio.play().catch(function () {});
       });
+    }
+
+    if (speedButton) {
+      const menu = document.createElement('div');
+      menu.className = 'speed-menu';
+      menu.hidden = true;
+      menu.setAttribute('role', 'menu');
+      menu.setAttribute('aria-label', 'Playback speed');
+
+      SPEEDS.forEach(function (speed) {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = 'speed-option';
+        option.textContent = speed + '×';
+        option.setAttribute('role', 'menuitemradio');
+        option.setAttribute('aria-checked', String(audio.playbackRate === speed));
+        option.addEventListener('click', function () {
+          audio.playbackRate = speed;
+          setSpeed(speed);
+          updateSpeedMenu();
+          menu.hidden = true;
+          speedButton.focus();
+        });
+        menu.appendChild(option);
+      });
+
+      speedButton.parentElement.appendChild(menu);
+
+      function updateSpeedMenu() {
+        speedButton.textContent = audio.playbackRate + '×';
+        speedButton.setAttribute('aria-label', 'Playback speed ' + audio.playbackRate + ' times. Open speed options.');
+        Array.from(menu.children).forEach(function (option) {
+          option.setAttribute('aria-checked', String(Number(option.textContent.replace('×', '')) === audio.playbackRate));
+        });
+      }
+
+      speedButton.addEventListener('click', function () {
+        menu.hidden = !menu.hidden;
+        updateSpeedMenu();
+      });
+
+      document.addEventListener('click', function (event) {
+        if (!speedButton.parentElement.contains(event.target)) menu.hidden = true;
+      });
+
+      updateSpeedMenu();
     }
 
     updatePlayButton();
