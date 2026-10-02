@@ -89,8 +89,8 @@
 
     const image = context.getImageData(0, 0, canvas.width, canvas.height);
     const data = image.data;
-    const paper = [0x20, 0x2d, 0x26];
-    const ink = [0xee, 0xeb, 0xe1];
+    const paper = [0x24, 0x27, 0x2b];
+    const ink = [0xee, 0xec, 0xe7];
 
     for (let i = 0; i < data.length; i += 4) {
       const r = data[i], g = data[i + 1], b = data[i + 2];
@@ -99,7 +99,7 @@
       const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 
       if (chroma < 22) {
-        // Map white paper to deep green-black and black text to warm ivory.
+        // Map white paper to neutral charcoal and black text to warm ivory.
         const t = 1 - luminance;
         data[i]     = Math.round(paper[0] + (ink[0] - paper[0]) * t);
         data[i + 1] = Math.round(paper[1] + (ink[1] - paper[1]) * t);
@@ -112,8 +112,8 @@
           l = Math.min(.72, .48 + l * .35);
           s = Math.max(.38, Math.min(.72, s));
         } else if (h > .25 && h < .55 && s > .12) {
-          // Botanical green becomes a softer, lighter green.
-          h = .42;
+          // Cool/green artwork becomes a restrained neutral accent.
+          h = .58;
           l = Math.min(.62, .34 + l * .45);
           s = Math.max(.28, Math.min(.58, s));
         } else {
