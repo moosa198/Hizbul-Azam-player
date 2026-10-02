@@ -1,4 +1,4 @@
-const VERSION = 'v14';
+const VERSION = 'v15';
 const SHELL_CACHE = 'hizbul-azam-shell-' + VERSION;
 const CONTENT_CACHE = 'hizbul-azam-content-' + VERSION;
 const SHELL = [
