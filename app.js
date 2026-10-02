@@ -20,105 +20,153 @@
     const tools = document.querySelector('.reader-tools');
     if (!audio || !viewer || !tools) return;
 
+    const day = audio.dataset.day;
     const key = STORAGE_PREFIX + 'autoScroll';
     let enabled = false;
-    let userPaused = false;
-    let programmatic = false;
     let raf = 0;
+    let wakeLock = null;
 
     try { enabled = localStorage.getItem(key) === 'true'; } catch (_) {}
 
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'reader-tool auto-scroll-control';
-    button.setAttribute('aria-pressed', 'false');
-    button.title = 'Keep the reader aligned with the audio';
+    button.setAttribute('aria-pressed', String(enabled));
+    button.title = 'Continuously scroll with the audio and keep the screen awake';
     tools.insertBefore(button, tools.querySelector('#focus-control') || null);
 
     function setButton() {
-      button.textContent = userPaused ? 'Resume sync' : (enabled ? 'Auto-scroll ✓' : 'Auto-scroll');
-      button.setAttribute('aria-pressed', String(enabled && !userPaused));
+      button.textContent = enabled ? 'Auto-scroll ✓' : 'Auto-scroll';
+      button.setAttribute('aria-pressed', String(enabled));
       button.setAttribute(
         'aria-label',
-        userPaused
-          ? 'Resume audio-synced scrolling'
-          : (enabled ? 'Turn off audio-synced scrolling' : 'Turn on audio-synced scrolling')
+        enabled
+          ? 'Turn off continuous audio scrolling'
+          : 'Turn on continuous audio scrolling'
       );
-      button.classList.toggle('is-active', enabled && !userPaused);
+      button.classList.toggle('is-active', enabled);
     }
 
     function pages() {
-      // Every Hizbul-Azam PDF has a cover page at index 0. It is deliberately
-      // excluded from audio synchronisation so the cover cannot offset the reading.
       return Array.from(viewer.querySelectorAll('.pdf-page-wrap')).slice(1);
     }
 
+    async function requestWakeLock() {
+      if (!enabled || audio.paused || !('wakeLock' in navigator)) return;
+      try {
+        if (wakeLock && wakeLock.released === false) return;
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', function () {
+          wakeLock = null;
+        });
+      } catch (_) {
+        wakeLock = null;
+      }
+    }
+
+    async function releaseWakeLock() {
+      if (!wakeLock) return;
+      try { await wakeLock.release(); } catch (_) {}
+      wakeLock = null;
+    }
+
     function scrollToAudio() {
-      if (!enabled || userPaused || audio.paused || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
+      if (!enabled || audio.paused || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
 
       const contentPages = pages();
       if (!contentPages.length) return;
 
       const ratio = Math.max(0, Math.min(1, audio.currentTime / audio.duration));
-      const position = ratio * contentPages.length;
+      const startIndex = day === 'friday' ? 2 : 1;
+      const safeStart = Math.min(startIndex, Math.max(0, contentPages.length - 1));
+      const available = Math.max(0, contentPages.length - 1 - safeStart);
+      const position = safeStart + ratio * available;
       const target = Math.min(contentPages.length - 1, Math.floor(position));
       const page = contentPages[target];
       if (!page) return;
 
-      programmatic = true;
-
       const pageTop = page.getBoundingClientRect().top + window.scrollY;
       const pageHeight = Math.max(page.offsetHeight, 1);
       const within = position - target;
-      const y = pageTop
-        + Math.min(.92, Math.max(0, within)) * pageHeight
-        - Math.min(window.innerHeight * .28, 220);
+
+      // At the beginning, place page 2 (or Friday page 3) in the middle of
+      // the phone screen. Thereafter the reading position moves continuously.
+      let y;
+      if (ratio < 0.001) {
+        y = pageTop + pageHeight / 2 - window.innerHeight / 2;
+      } else {
+        y = pageTop + Math.min(.98, Math.max(0, within)) * pageHeight
+          - Math.min(window.innerHeight * .38, 300);
+      }
 
       window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
-      window.setTimeout(function () { programmatic = false; }, 180);
     }
 
     function schedule() {
-      if (raf) return;
-      raf = window.requestAnimationFrame(function () {
+      if (!enabled || audio.paused || raf) return;
+      raf = window.requestAnimationFrame(function tick() {
         raf = 0;
+        if (!enabled || audio.paused) return;
         scrollToAudio();
+        schedule();
       });
     }
 
-    button.addEventListener('click', function () {
-      if (userPaused) {
-        userPaused = false;
-        enabled = true;
+    async function syncPlaybackState() {
+      if (enabled && !audio.paused && !audio.ended) {
+        await requestWakeLock();
+        schedule();
       } else {
-        enabled = !enabled;
+        if (raf) {
+          window.cancelAnimationFrame(raf);
+          raf = 0;
+        }
+        await releaseWakeLock();
       }
+    }
 
+    button.addEventListener('click', async function () {
+      enabled = !enabled;
       try { localStorage.setItem(key, String(enabled)); } catch (_) {}
       setButton();
-      if (enabled) schedule();
+
+      if (enabled) {
+        await requestWakeLock();
+        if (!audio.paused) schedule();
+        else scrollToAudio();
+      } else {
+        if (raf) {
+          window.cancelAnimationFrame(raf);
+          raf = 0;
+        }
+        await releaseWakeLock();
+      }
     });
 
-    // Manual scrolling pauses sync rather than fighting the reader. The user
-    // can resume it with the same button at any time.
-    window.addEventListener('scroll', function () {
-      if (!enabled || programmatic || userPaused) return;
-      userPaused = true;
-      setButton();
-    }, { passive: true });
+    audio.addEventListener('play', syncPlaybackState);
+    audio.addEventListener('pause', syncPlaybackState);
+    audio.addEventListener('ended', syncPlaybackState);
+    audio.addEventListener('timeupdate', function () {
+      if (enabled && !audio.paused && !raf) schedule();
+    });
 
-    audio.addEventListener('timeupdate', schedule);
-    audio.addEventListener('play', function () {
-      if (enabled && !userPaused) schedule();
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible' && enabled && !audio.paused) {
+        requestWakeLock();
+        schedule();
+      }
     });
 
     const observer = new MutationObserver(function () {
-      if (enabled && !userPaused) schedule();
+      if (enabled && !audio.paused) schedule();
     });
-    observer.observe(viewer, { childList: true });
+    observer.observe(viewer, { childList: true, subtree: true });
 
     setButton();
-    if (enabled) window.setTimeout(schedule, 700);
+    if (enabled && !audio.paused) {
+      requestWakeLock();
+      schedule();
+    }
   }
 
   function setupTheme() {
