@@ -461,6 +461,38 @@
     writeJSON(lastKey, data);
   };
 
+  function setupHomeDurations() {
+    const tiles = document.querySelectorAll('.day-tile[data-audio]');
+    if (!tiles.length) return;
+
+    tiles.forEach(function (tile) {
+      const target = tile.querySelector('[data-duration]');
+      const src = tile.dataset.audio;
+      if (!target || !src) return;
+
+      const audio = new Audio();
+      audio.preload = 'metadata';
+
+      function formatEstimate(seconds) {
+        if (!Number.isFinite(seconds) || seconds <= 0) return '';
+        const minutes = Math.max(1, Math.round(seconds / 60));
+        return '≈ ' + minutes + ' min';
+      }
+
+      audio.addEventListener('loadedmetadata', function () {
+        const estimate = formatEstimate(audio.duration);
+        if (estimate) target.textContent = estimate;
+      }, { once: true });
+
+      audio.addEventListener('error', function () {
+        target.textContent = 'Audio available';
+      }, { once: true });
+
+      audio.src = src;
+      audio.load();
+    });
+  }
+
   function setupContinueCard() {
     const card = document.getElementById('continue-card');
     if (!card) return;
@@ -776,6 +808,7 @@
   setupTheme();
   setupAudio();
   setupAutoScroll();
+  setupHomeDurations();
   setupContinueCard();
   setupInstall();
   setupTranslation();
