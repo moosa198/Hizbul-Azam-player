@@ -700,7 +700,7 @@ audio {
 .play-control:focus-visible, .speed-control:focus-visible, .audio-progress:focus-visible { outline: 2px solid rgba(215,197,150,.9); outline-offset: 2px; }
 
 .audio-progress-wrap { flex: 1 1 auto; min-width: 0; }
-.audio-times { display: none; justify-content: space-between; margin-bottom: 4px; color: rgba(255,253,248,.70); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; font-size: .66rem; font-variant-numeric: tabular-nums; }
+.audio-times { display: flex; justify-content: space-between; align-items: center; margin: 0 2px 1px; color: rgba(255,253,248,.70); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; font-size: .66rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .audio-progress-shell { position: relative; height: 28px; display: flex; align-items: center; }
 .audio-progress-track { position: absolute; left: 0; right: 0; top: 50%; height: 5px; transform: translateY(-50%); border-radius: 999px; background: rgba(255,253,248,.24); overflow: visible; pointer-events: none; }
 .audio-progress-fill { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: inherit; background: var(--gold-soft); }
@@ -1244,7 +1244,7 @@ body.translation-open { overflow: hidden; }
 }
 
 
-/* v15 audio UX */
+/* v16 audio timing UX */
 .restart-control {
   flex: 0 0 auto;
   width: 32px;
