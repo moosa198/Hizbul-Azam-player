@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f4ec">
   <title>Saturday — Hizbul-Azam</title>
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
   <link rel="manifest" href="manifest.webmanifest?v=11">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/hizbul-azam-favicon.svg?v=11">
   <link rel="apple-touch-icon" href="icons/hizbul-azam-icon.svg?v=11">
   <script>try{var t=localStorage.getItem("hizbulAzam:theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t;}catch(e){}</script>
-  <script src="app.js?v=15" defer></script>
+  <script src="app.js?v=16" defer></script>
   <script src="pdf-viewer.js" defer></script>
 </head>
 <body class="page">
@@ -71,6 +71,10 @@
         <div class="desktop-audio-controls" aria-label="Audio playback">
           <button id="play-control" class="play-control" type="button" aria-label="Play audio">▶</button>
           <div class="audio-progress-wrap">
+            <div class="audio-times" aria-label="Audio time">
+              <span id="current-time">0:00</span>
+              <span id="duration">0:00</span>
+            </div>
             <div class="audio-progress-shell">
               <div class="audio-progress-track" aria-hidden="true">
                 <span id="audio-progress-fill" class="audio-progress-fill"></span>
