@@ -472,7 +472,7 @@
 
   function getDayProgress(day) {
     const data = readJSON(STORAGE_PREFIX + 'progress:' + day, {});
-    return Math.round(Math.max(0, Math.min(100, Number(data && data.percent) || 0)));
+    return Math.round(Math.max(0, Math.min(100, Number(data && data.percent) || 0), Number(data && data.page) || 0, Number(data && data.audio) || 0));
   }
 
   function updateHomeCompletion() {
@@ -520,12 +520,14 @@
     updateHomeCompletion();
   }
 
-  function updateDayProgress(day, percent) {
+  function updateDayProgress(day, percent, source) {
     const next = Math.round(Math.max(0, Math.min(100, Number(percent) || 0)));
     const key = STORAGE_PREFIX + 'progress:' + day;
     const data = readJSON(key, {});
-    if (data.percent === next) return;
-    data.percent = next;
+    if (source) data[source] = Math.max(Number(data[source]) || 0, next);
+    const furthest = Math.max(Number(data.page) || 0, Number(data.audio) || 0, Number(data.percent) || 0);
+    if (data.percent === furthest && (!source || data[source] === next)) return;
+    data.percent = Math.round(furthest);
     data.updated = Date.now();
     writeJSON(key, data);
     updateCompletionUI(day);
@@ -547,13 +549,13 @@
     if (audio) {
       const syncAudio = function () {
         if (Number.isFinite(audio.duration) && audio.duration > 0) {
-          updateDayProgress(day, audio.currentTime / audio.duration * 100);
+          updateDayProgress(day, audio.currentTime / audio.duration * 100, 'audio');
         }
       };
       audio.addEventListener('loadedmetadata', syncAudio);
       audio.addEventListener('timeupdate', syncAudio);
       audio.addEventListener('ended', function () {
-        updateDayProgress(day, 100);
+        updateDayProgress(day, 100, 'audio');
         setDayComplete(day, 'audio');
       });
     }
@@ -563,7 +565,7 @@
       const pct = Number(event.detail.total) > 0
         ? Number(event.detail.page) / Number(event.detail.total) * 100
         : 0;
-      updateDayProgress(day, pct);
+      updateDayProgress(day, pct, 'page');
       if (Number(event.detail.page) === Number(event.detail.total)) {
         setDayComplete(day, 'pages');
       }
