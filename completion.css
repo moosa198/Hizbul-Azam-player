@@ -1,0 +1,96 @@
+/* Completion state and progress — deliberately quiet so the reading experience stays primary. */
+.day-progress {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: .62rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.day-progress.is-complete {
+  color: var(--green-800);
+  font-weight: 600;
+}
+.day-tile.is-complete {
+  border-color: var(--line-green);
+}
+
+.completion-status {
+  width: min(800px, 100%);
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -12px auto 12px;
+  padding: 5px 8px;
+  color: var(--muted);
+  font-size: .64rem;
+}
+.completion-status > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 0;
+}
+.completion-status strong {
+  color: var(--green-800);
+  font-size: .68rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.completion-status small {
+  color: var(--muted);
+  font-size: .58rem;
+  line-height: 1.15;
+}
+.completion-percent,
+.completion-mark {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border: 1px solid var(--gold-soft);
+  border-radius: 50%;
+  color: var(--gold);
+  font-size: .56rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.completion-mark {
+  border-color: var(--line-green);
+  color: var(--green-800);
+  font-size: .7rem;
+}
+.completion-undo {
+  margin-left: auto;
+  flex: 0 0 auto;
+  padding: 3px 5px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: .58rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.completion-undo:hover,
+.completion-undo:focus-visible { color: var(--green-800); }
+.completion-status.is-complete strong { color: var(--green-800); }
+
+/* The requested product behaviour is no auto-scroll control. Keep the old
+   JS harmlessly dormant visually until it can be removed from the legacy app. */
+.auto-scroll-control { display: none !important; }
+
+@media (max-width: 800px) {
+  .completion-status { margin: -10px auto 9px; min-height: 30px; padding: 3px 4px; }
+  .completion-status strong { font-size: .64rem; }
+  .completion-status small { font-size: .55rem; }
+  .completion-percent,
+  .completion-mark { width: 23px; height: 23px; }
+  .day-progress { margin-top: 6px; font-size: .58rem; }
+}
+
+:root[data-theme="dark"] .day-progress.is-complete,
+:root[data-theme="dark"] .completion-status strong,
+:root[data-theme="dark"] .completion-mark { color: var(--gold-soft); }
