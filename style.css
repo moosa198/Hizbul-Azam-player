@@ -1387,3 +1387,54 @@ body.translation-open { overflow: hidden; }
   .completion-status strong { font-size: .66rem; }
   .completion-percent, .completion-mark { width: 25px; height: 25px; }
 }
+
+
+/* v20 UX: persistent reader navigation and clearer mobile orientation. */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(246,243,235,.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.home-link {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255,253,248,.78);
+  box-sizing: border-box;
+}
+
+.pdf-page-wrap {
+  scroll-margin-top: 62px;
+}
+
+@media (max-width: 800px) {
+  .topbar {
+    min-height: 48px;
+    padding: 5px 3px;
+    background: rgba(246,243,235,.96);
+  }
+  .home-link {
+    min-height: 40px;
+    padding: 6px 11px;
+    font-size: .82rem;
+  }
+  .sidebar a {
+    min-height: 38px;
+    align-items: center;
+  }
+}
+
+:root[data-theme="dark"] .topbar {
+  background: rgba(23,25,28,.95);
+}
+:root[data-theme="dark"] .home-link {
+  background: rgba(36,39,43,.88);
+  border-color: var(--line);
+}
