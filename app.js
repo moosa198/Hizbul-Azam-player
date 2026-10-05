@@ -1,5 +1,6 @@
 (function () {
   const STORAGE_PREFIX = 'hizbulAzam:';
+  const completionKey = STORAGE_PREFIX + 'completed';
   const speedKey = STORAGE_PREFIX + 'playbackSpeed';
   const lastKey = STORAGE_PREFIX + 'lastPosition';
   const installKey = STORAGE_PREFIX + 'installDismissed';
@@ -461,6 +462,114 @@
     writeJSON(lastKey, data);
   };
 
+  function getCompletions() {
+    return readJSON(completionKey, {});
+  }
+
+  function isDayComplete(day) {
+    return Boolean(getCompletions()[day]);
+  }
+
+  function getDayProgress(day) {
+    const data = readJSON(STORAGE_PREFIX + 'progress:' + day, {});
+    return Math.round(Math.max(0, Math.min(100, Number(data && data.percent) || 0)));
+  }
+
+  function updateHomeCompletion() {
+    document.querySelectorAll('.day-tile[data-day]').forEach(function (tile) {
+      const day = tile.dataset.day;
+      const target = tile.querySelector('[data-day-progress]');
+      if (!target) return;
+      const done = isDayComplete(day);
+      target.textContent = done ? '✓ Shukr · completed' : getDayProgress(day) + '%';
+      target.classList.toggle('is-complete', done);
+    });
+  }
+
+  function updateCompletionUI(day) {
+    const box = document.getElementById('completion-status');
+    if (!box || box.dataset.day !== day) return;
+    const done = isDayComplete(day);
+    const pct = getDayProgress(day);
+    box.classList.toggle('is-complete', done);
+    box.innerHTML = done
+      ? '<span class="completion-mark" aria-hidden="true">✓</span><span><strong>Shukr · completed</strong><small>This portion is complete.</small></span><button type="button" class="completion-undo" id="completion-undo">Undo</button>'
+      : '<span class="completion-percent" aria-hidden="true">' + pct + '%</span><span><strong>' + pct + '% complete</strong><small>Keep going at your own pace.</small></span>';
+    const undo = box.querySelector('#completion-undo');
+    if (undo) {
+      undo.addEventListener('click', function () {
+        const all = getCompletions();
+        delete all[day];
+        writeJSON(completionKey, all);
+        updateCompletionUI(day);
+        updateHomeCompletion();
+      });
+    }
+  }
+
+  function setDayComplete(day, source) {
+    if (isDayComplete(day)) return;
+    const all = getCompletions();
+    all[day] = { at: Date.now(), source: source || 'portion' };
+    writeJSON(completionKey, all);
+    const progress = readJSON(STORAGE_PREFIX + 'progress:' + day, {});
+    progress.percent = 100;
+    progress.updated = Date.now();
+    writeJSON(STORAGE_PREFIX + 'progress:' + day, progress);
+    updateCompletionUI(day);
+    updateHomeCompletion();
+  }
+
+  function updateDayProgress(day, percent) {
+    const next = Math.round(Math.max(0, Math.min(100, Number(percent) || 0)));
+    const key = STORAGE_PREFIX + 'progress:' + day;
+    const data = readJSON(key, {});
+    if (data.percent === next) return;
+    data.percent = next;
+    data.updated = Date.now();
+    writeJSON(key, data);
+    updateCompletionUI(day);
+    updateHomeCompletion();
+  }
+
+  function setupCompletion() {
+    const audio = document.querySelector('audio[data-day]');
+    const viewer = document.getElementById('pdf-viewer');
+    const day = audio ? audio.dataset.day : viewer ? viewer.dataset.day : '';
+    if (!day) return;
+
+    const box = document.getElementById('completion-status');
+    if (box) {
+      box.dataset.day = day;
+      updateCompletionUI(day);
+    }
+
+    if (audio) {
+      const syncAudio = function () {
+        if (Number.isFinite(audio.duration) && audio.duration > 0) {
+          updateDayProgress(day, audio.currentTime / audio.duration * 100);
+        }
+      };
+      audio.addEventListener('loadedmetadata', syncAudio);
+      audio.addEventListener('timeupdate', syncAudio);
+      audio.addEventListener('ended', function () {
+        updateDayProgress(day, 100);
+        setDayComplete(day, 'audio');
+      });
+    }
+
+    window.addEventListener('hizbulAzam:pagechange', function (event) {
+      if (!event.detail || event.detail.day !== day) return;
+      const pct = Number(event.detail.total) > 0
+        ? Number(event.detail.page) / Number(event.detail.total) * 100
+        : 0;
+      updateDayProgress(day, pct);
+      if (Number(event.detail.page) === Number(event.detail.total)) {
+        setDayComplete(day, 'pages');
+      }
+    });
+  }
+
   function setupHomeDurations() {
     const tiles = document.querySelectorAll('.day-tile[data-audio]');
     if (!tiles.length) return;
@@ -807,8 +916,10 @@
 
   setupTheme();
   setupAudio();
+  setupCompletion();
   setupAutoScroll();
   setupHomeDurations();
+  updateHomeCompletion();
   setupContinueCard();
   setupInstall();
   setupTranslation();
