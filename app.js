@@ -709,7 +709,7 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=18', { updateViaCache: 'none' }).catch(function () {});
+      navigator.serviceWorker.register('./sw.js?v=19', { updateViaCache: 'none' }).catch(function () {});
     });
   }
 
