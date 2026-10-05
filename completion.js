@@ -75,10 +75,12 @@
       const target = tile.querySelector('[data-day-progress]');
       if (!target) return;
       const done = isComplete(day);
-      target.textContent = done ? '✓ Shukr · completed' : getProgress(day) + '%';
+      const pct = getProgress(day);
+      target.textContent = done ? '✓ Shukr · completed' : pct + '%';
       target.classList.toggle('is-complete', done);
       tile.classList.toggle('is-complete', done);
-      tile.setAttribute('aria-label', tile.querySelector('.day-name')?.textContent + (done ? ' — completed' : ' — ' + getProgress(day) + '% complete'));
+      const name = tile.querySelector('.day-name')?.textContent || day;
+      tile.setAttribute('aria-label', name + (done ? ' — completed' : ' — ' + pct + '% complete'));
     });
   }
 
@@ -119,6 +121,7 @@
     }
 
     audio.addEventListener('loadedmetadata', audioProgress);
+    audio.addEventListener('durationchange', audioProgress);
     audio.addEventListener('timeupdate', audioProgress);
     audio.addEventListener('ended', function () {
       saveProgress(day, 'audio', 100);
@@ -151,6 +154,11 @@
   function init() {
     renderHome();
     initReader();
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('./sw.js?v=17', { updateViaCache: 'none' }).catch(function () {});
+      });
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
