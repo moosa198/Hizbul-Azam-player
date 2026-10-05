@@ -63,11 +63,15 @@ self.addEventListener('fetch', event => {
 
     // Canonicalise older asset URLs used by already-published daily pages.
     if (url.pathname.endsWith('/app.js') || url.pathname === new URL('./app.js', self.location).pathname) {
-      event.respondWith(fetch(new URL('./app.js?v=19', self.location), { cache: 'no-cache' }));
+      event.respondWith(fetch(new URL('./app.js?v=20', self.location), { cache: 'no-cache' }));
       return;
     }
     if (url.pathname.endsWith('/style.css') || url.pathname === new URL('./style.css', self.location).pathname) {
-      event.respondWith(fetch(new URL('./style.css?v=18', self.location), { cache: 'no-cache' }));
+      event.respondWith(fetch(new URL('./style.css?v=19', self.location), { cache: 'no-cache' }));
+      return;
+    }
+    if (url.pathname.endsWith('/pdf-viewer.js') || url.pathname === new URL('./pdf-viewer.js', self.location).pathname) {
+      event.respondWith(fetch(new URL('./pdf-viewer.js?v=2', self.location), { cache: 'no-cache' }));
       return;
     }
 
