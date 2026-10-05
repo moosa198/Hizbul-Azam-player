@@ -15,223 +15,6 @@
 
 
 
-  function setupAutoScroll() {
-    const audio = document.querySelector('audio[data-day]');
-    const viewer = document.getElementById('pdf-viewer');
-    const tools = document.querySelector('.reader-tools');
-    if (!audio || !viewer || !tools) return;
-
-    const day = audio.dataset.day;
-    const key = STORAGE_PREFIX + 'autoScroll';
-    const START_DELAY = 5000;
-    let enabled = false;
-    let raf = 0;
-    let wakeLock = null;
-    let delayUntil = 0;
-    let scrollStart = null;
-    let scrollEnd = null;
-    let lastScrollHeight = 0;
-    let currentY = null;
-
-    try { enabled = localStorage.getItem(key) === 'true'; } catch (_) {}
-
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'reader-tool auto-scroll-control';
-    button.setAttribute('aria-pressed', String(enabled));
-    button.title = 'Continuously scroll with the audio and keep the screen awake';
-    tools.insertBefore(button, tools.querySelector('#focus-control') || null);
-
-    function setButton() {
-      button.textContent = enabled ? 'Auto-scroll ✓' : 'Auto-scroll';
-      button.setAttribute('aria-pressed', String(enabled));
-      button.setAttribute('aria-label', enabled
-        ? 'Turn off continuous audio scrolling'
-        : 'Turn on continuous audio scrolling');
-      button.classList.toggle('is-active', enabled);
-    }
-
-    function pages() {
-      return Array.from(viewer.querySelectorAll('.pdf-page-wrap')).slice(1);
-    }
-
-    async function requestWakeLock() {
-      if (!enabled || audio.paused || !('wakeLock' in navigator)) return;
-      try {
-        if (wakeLock && wakeLock.released === false) return;
-        wakeLock = await navigator.wakeLock.request('screen');
-        wakeLock.addEventListener('release', function () { wakeLock = null; });
-      } catch (_) {
-        wakeLock = null;
-      }
-    }
-
-    async function releaseWakeLock() {
-      if (!wakeLock) return;
-      try { await wakeLock.release(); } catch (_) {}
-      wakeLock = null;
-    }
-
-    function getInitialScrollTop() {
-      const contentPages = pages();
-      if (!contentPages.length) return window.scrollY;
-
-      const startIndex = day === 'friday' ? 2 : 1;
-      const page = contentPages[Math.min(startIndex, contentPages.length - 1)];
-      if (!page) return window.scrollY;
-
-      const rect = page.getBoundingClientRect();
-      return Math.max(0, rect.top + window.scrollY + rect.height / 2 - window.innerHeight / 2);
-    }
-
-    function resetScrollPlan() {
-      scrollStart = null;
-      scrollEnd = null;
-      currentY = null;
-      lastScrollHeight = 0;
-    }
-
-    function initialiseScrollPlan() {
-      if (!Number.isFinite(audio.duration) || audio.duration <= 0) return false;
-
-      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      scrollStart = getInitialScrollTop();
-      scrollEnd = maxScroll;
-      lastScrollHeight = document.documentElement.scrollHeight;
-      currentY = scrollStart;
-      window.scrollTo({ top: scrollStart, behavior: 'auto' });
-      return true;
-    }
-
-    function updateScrollEndIfLayoutChanged() {
-      const height = document.documentElement.scrollHeight;
-      if (!scrollStart || !lastScrollHeight) return;
-      if (Math.abs(height - lastScrollHeight) < 80) return;
-
-      const previousMax = Math.max(0, lastScrollHeight - window.innerHeight);
-      const newMax = Math.max(0, height - window.innerHeight);
-      if (previousMax > 0 && scrollEnd !== null) {
-        const travelled = Math.max(0, Math.min(1, (currentY - scrollStart) / Math.max(1, scrollEnd - scrollStart)));
-        scrollEnd = scrollStart + travelled * Math.max(0, newMax - scrollStart);
-      } else {
-        scrollEnd = newMax;
-      }
-      lastScrollHeight = height;
-    }
-
-    function tick() {
-      raf = 0;
-      if (!enabled || audio.paused || audio.ended) return;
-
-      const now = performance.now();
-      if (now < delayUntil) {
-        raf = window.requestAnimationFrame(tick);
-        return;
-      }
-
-      if (scrollStart === null) {
-        if (!initialiseScrollPlan()) {
-          raf = window.requestAnimationFrame(tick);
-          return;
-        }
-      }
-
-      updateScrollEndIfLayoutChanged();
-
-      const duration = Math.max(0.001, audio.duration);
-      const progress = Math.max(0, Math.min(1, audio.currentTime / duration));
-      const targetY = scrollStart + progress * Math.max(0, scrollEnd - scrollStart);
-
-      // Smoothly follow the time-derived position instead of recalculating
-      // page coordinates every frame. This avoids jumps when PDF pages render.
-      const smoothing = 0.12;
-      currentY += (targetY - currentY) * smoothing;
-
-      if (Math.abs(targetY - currentY) < 0.35) currentY = targetY;
-      window.scrollTo({ top: Math.max(0, currentY), behavior: 'auto' });
-
-      raf = window.requestAnimationFrame(tick);
-    }
-
-    function schedule() {
-      if (!enabled || audio.paused || raf) return;
-      raf = window.requestAnimationFrame(tick);
-    }
-
-    function beginDelayedScroll() {
-      resetScrollPlan();
-      delayUntil = performance.now() + START_DELAY;
-      schedule();
-    }
-
-    async function syncPlaybackState() {
-      if (enabled && !audio.paused && !audio.ended) {
-        await requestWakeLock();
-        beginDelayedScroll();
-      } else {
-        if (raf) {
-          window.cancelAnimationFrame(raf);
-          raf = 0;
-        }
-        resetScrollPlan();
-        await releaseWakeLock();
-      }
-    }
-
-    button.addEventListener('click', async function () {
-      enabled = !enabled;
-      try { localStorage.setItem(key, String(enabled)); } catch (_) {}
-      setButton();
-
-      if (enabled) {
-        if (!audio.paused) {
-          await requestWakeLock();
-          beginDelayedScroll();
-        }
-      } else {
-        if (raf) {
-          window.cancelAnimationFrame(raf);
-          raf = 0;
-        }
-        resetScrollPlan();
-        await releaseWakeLock();
-      }
-    });
-
-    audio.addEventListener('play', syncPlaybackState);
-    audio.addEventListener('pause', syncPlaybackState);
-    audio.addEventListener('ended', syncPlaybackState);
-
-    audio.addEventListener('seeking', function () {
-      if (enabled && !audio.paused) {
-        resetScrollPlan();
-        delayUntil = performance.now() + 500;
-        schedule();
-      }
-    });
-
-    document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'visible' && enabled && !audio.paused) {
-        requestWakeLock();
-        if (!raf) schedule();
-      }
-    });
-
-    // PDF rendering can change document height. We only adapt the destination
-    // range when that height changes materially; we never chase individual page
-    // positions, which is what caused the previous random-looking jumps.
-    const observer = new MutationObserver(function () {
-      if (enabled && !audio.paused) schedule();
-    });
-    observer.observe(viewer, { childList: true, subtree: true });
-
-    setButton();
-    if (enabled && !audio.paused) {
-      requestWakeLock();
-      beginDelayedScroll();
-    }
-  }
-
   function setupTheme() {
     const root = document.documentElement;
     const key = STORAGE_PREFIX + 'theme';
@@ -566,10 +349,24 @@
         ? Number(event.detail.page) / Number(event.detail.total) * 100
         : 0;
       updateDayProgress(day, pct, 'page');
-      if (Number(event.detail.page) === Number(event.detail.total)) {
-        setDayComplete(day, 'pages');
-      }
     });
+
+    // Page completion is an endpoint action, not a page-selection event.
+    // A restored/saved final page must never count as newly completed.
+    let pageScrollTimer = 0;
+    window.addEventListener('scroll', function () {
+      if (pageScrollTimer) return;
+      pageScrollTimer = window.setTimeout(function () {
+        pageScrollTimer = 0;
+        const total = Number(document.getElementById('total-pages')?.textContent);
+        const current = Number(document.getElementById('current-page')?.textContent);
+        if (total > 0 && current >= total &&
+            window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 28) {
+          updateDayProgress(day, 100, 'page');
+          setDayComplete(day, 'pages');
+        }
+      }, 80);
+    }, { passive: true });
   }
 
   function setupHomeDurations() {
@@ -912,14 +709,13 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=12', { updateViaCache: 'none' }).catch(function () {});
+      navigator.serviceWorker.register('./sw.js?v=18', { updateViaCache: 'none' }).catch(function () {});
     });
   }
 
   setupTheme();
   setupAudio();
   setupCompletion();
-  setupAutoScroll();
   setupHomeDurations();
   updateHomeCompletion();
   setupContinueCard();
