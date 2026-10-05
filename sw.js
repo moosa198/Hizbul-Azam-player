@@ -1,8 +1,8 @@
-const VERSION = 'v18';
+const VERSION = 'v19';
 const SHELL_CACHE = 'hizbul-azam-shell-' + VERSION;
 const CONTENT_CACHE = 'hizbul-azam-content-' + VERSION;
 const SHELL = [
-  './', './index.html', './style.css?v=18', './completion.css?v=2', './app.js?v=19', './completion.js?v=1', './pdf-viewer.js?v=1', './manifest.webmanifest?v=12',
+  './', './index.html', './style.css?v=18', './completion.css?v=2', './app.js?v=19', './pdf-viewer.js?v=1', './manifest.webmanifest?v=12',
   './icons/hizbul-azam-favicon-32.png?v=14', './icons/hizbul-azam-icon-192.png?v=14', './icons/hizbul-azam-icon-512.png?v=14',
   './translations/saturday.json', './translations/sunday.json', './translations/monday.json', './translations/tuesday.json', './translations/wednesday.json', './translations/thursday.json', './translations/friday.json',
   './saturday.html', './sunday.html', './monday.html', './tuesday.html', './wednesday.html', './thursday.html', './friday.html'
@@ -61,15 +61,12 @@ self.addEventListener('fetch', event => {
       return;
     }
 
+    // App shell is network-first so published fixes propagate to installed PWAs.
     event.respondWith(
-      caches.match(request).then(async cached => {
-        if (cached) return enhanceHtml(cached);
-        const response = await fetch(request);
-        if (response.ok) {
-          caches.open(SHELL_CACHE).then(cache => cache.put(request, response.clone()));
-        }
-        return enhanceHtml(response);
-      }).catch(() => caches.match('./index.html').then(enhanceHtml))
+      fetch(request, { cache: 'no-cache' }).then(response => {
+        if (response.ok) caches.open(SHELL_CACHE).then(cache => cache.put(request, response.clone())).catch(() => {});
+        return response;
+      }).catch(() => caches.match(request).then(cached => cached || caches.match('./index.html')))
     );
     return;
   }
