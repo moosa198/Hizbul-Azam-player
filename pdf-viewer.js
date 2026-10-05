@@ -214,9 +214,8 @@
 
   function getSavedPage() {
     try {
-      const data = JSON.parse(localStorage.getItem('hizbulAzam:lastPosition') || 'null');
-      if (!data || data.day !== day) return 1;
-      return Math.max(1, Number(data.page) || 1);
+      const data = JSON.parse(localStorage.getItem('hizbulAzam:page:' + day) || 'null');
+      return Math.max(1, Number(data && data.page) || 1);
     } catch (_) { return 1; }
   }
 
