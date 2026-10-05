@@ -1220,30 +1220,6 @@ body.translation-open { overflow: hidden; }
   .translation-entry p { font-size: .92rem; line-height: 1.68; }
 }
 
-/* Audio-synced scrolling control */
-.auto-scroll-control {
-  min-width: 92px;
-}
-
-.auto-scroll-control.is-active {
-  border-color: var(--gold);
-  color: var(--green-950);
-  background: rgba(184,154,90,.12);
-}
-
-:root[data-theme="dark"] .auto-scroll-control.is-active {
-  border-color: var(--gold);
-  color: var(--gold-soft);
-  background: #30343a;
-}
-
-@media (max-width: 800px) {
-  .auto-scroll-control {
-    min-width: 84px;
-  }
-}
-
-
 /* v16 audio timing UX */
 .restart-control {
   flex: 0 0 auto;
