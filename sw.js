@@ -2,7 +2,7 @@ const VERSION = 'v16';
 const SHELL_CACHE = 'hizbul-azam-shell-' + VERSION;
 const CONTENT_CACHE = 'hizbul-azam-content-' + VERSION;
 const SHELL = [
-  './', './index.html', './style.css?v=17', './app.js?v=17', './pdf-viewer.js?v=1', './manifest.webmanifest?v=11',
+  './', './index.html', './style.css?v=17', './app.js?v=18', './pdf-viewer.js?v=1', './manifest.webmanifest?v=11',
   './icons/hizbul-azam-favicon-32.png?v=14', './icons/hizbul-azam-icon-192.png?v=14', './icons/hizbul-azam-icon-512.png?v=14',
   './translations/saturday.json', './translations/sunday.json', './translations/monday.json', './translations/tuesday.json', './translations/wednesday.json', './translations/thursday.json', './translations/friday.json',
   './saturday.html', './sunday.html', './monday.html', './tuesday.html', './wednesday.html', './thursday.html', './friday.html'
