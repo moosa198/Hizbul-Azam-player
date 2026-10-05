@@ -1310,3 +1310,104 @@ body.translation-open { overflow: hidden; }
     color: var(--green-950);
   }
 }
+
+
+/* Completion + per-day progress */
+.day-progress {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  margin-top: 8px;
+  min-height: 18px;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: .62rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+}
+.day-progress.is-complete {
+  color: var(--green-800);
+  font-weight: 600;
+}
+.completion-status {
+  width: min(800px, 100%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  margin: 0 auto 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255,253,248,.62);
+  color: var(--muted);
+}
+.completion-status > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+.completion-status strong {
+  color: var(--green-800);
+  font-size: .72rem;
+  font-weight: 600;
+}
+.completion-status small {
+  color: var(--muted);
+  font-size: .62rem;
+}
+.completion-percent,
+.completion-mark {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--gold);
+  border: 1px solid var(--gold-soft);
+  font-size: .61rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.completion-mark {
+  color: var(--green-800);
+  border-color: var(--line-green);
+  font-size: .78rem;
+}
+.completion-undo {
+  margin-left: auto;
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: .62rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.completion-undo:hover { color: var(--green-800); }
+.completion-status.is-complete {
+  border-color: var(--line-green);
+  background: rgba(241,245,241,.72);
+}
+:root[data-theme="dark"] .day-progress.is-complete,
+:root[data-theme="dark"] .completion-status strong,
+:root[data-theme="dark"] .completion-mark { color: var(--gold-soft); }
+:root[data-theme="dark"] .completion-status {
+  background: rgba(36,39,43,.82);
+  border-color: var(--line);
+}
+:root[data-theme="dark"] .completion-status.is-complete {
+  background: #2b3035;
+  border-color: var(--line-green);
+}
+@media (max-width: 800px) {
+  .day-progress { margin-top: 5px; font-size: .56rem; }
+  .completion-status { margin-bottom: 8px; min-height: 36px; padding: 6px 8px; }
+  .completion-status small { font-size: .58rem; }
+  .completion-status strong { font-size: .66rem; }
+  .completion-percent, .completion-mark { width: 25px; height: 25px; }
+}
