@@ -4,6 +4,7 @@
   const speedKey = STORAGE_PREFIX + 'playbackSpeed';
   const lastKey = STORAGE_PREFIX + 'lastPosition';
   const installKey = STORAGE_PREFIX + 'installDismissed';
+  const pageKey = day => STORAGE_PREFIX + 'page:' + day;
 
   function readJSON(key, fallback) {
     try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch (_) { return fallback; }
@@ -238,11 +239,9 @@
 
   window.HizbulAzam = window.HizbulAzam || {};
   window.HizbulAzam.saveLastPosition = function (day, page) {
-    const data = readJSON(lastKey, {});
-    data.day = day;
-    data.page = page;
-    data.updated = Date.now();
-    writeJSON(lastKey, data);
+    const position = { day: day, page: page, updated: Date.now() };
+    writeJSON(pageKey(day), position);
+    writeJSON(lastKey, position);
   };
 
   function getCompletions() {
@@ -255,7 +254,8 @@
 
   function getDayProgress(day) {
     const data = readJSON(STORAGE_PREFIX + 'progress:' + day, {});
-    return Math.round(Math.max(0, Math.min(100, Number(data && data.percent) || 0), Number(data && data.page) || 0, Number(data && data.audio) || 0));
+    // Displayed progress is intentionally based on pages read, not listening time.
+    return Math.round(Math.max(0, Math.min(100, Number(data && data.page) || 0)));
   }
 
   function updateHomeCompletion() {
@@ -264,7 +264,7 @@
       const target = tile.querySelector('[data-day-progress]');
       if (!target) return;
       const done = isDayComplete(day);
-      target.textContent = done ? '✓ Shukr · completed' : getDayProgress(day) + '%';
+      target.textContent = done ? '✓ Shukr · completed' : getDayProgress(day) + '% read';
       target.classList.toggle('is-complete', done);
     });
   }
@@ -295,22 +295,26 @@
     const all = getCompletions();
     all[day] = { at: Date.now(), source: source || 'portion' };
     writeJSON(completionKey, all);
-    const progress = readJSON(STORAGE_PREFIX + 'progress:' + day, {});
-    progress.percent = 100;
-    progress.updated = Date.now();
-    writeJSON(STORAGE_PREFIX + 'progress:' + day, progress);
+    if (source === 'pages') {
+      const progress = readJSON(STORAGE_PREFIX + 'progress:' + day, {});
+      progress.page = 100;
+      progress.percent = 100;
+      progress.updated = Date.now();
+      writeJSON(STORAGE_PREFIX + 'progress:' + day, progress);
+    }
     updateCompletionUI(day);
     updateHomeCompletion();
   }
 
   function updateDayProgress(day, percent, source) {
+    // Only genuine page-reading progress contributes to the displayed percentage.
+    if (source !== 'page') return;
     const next = Math.round(Math.max(0, Math.min(100, Number(percent) || 0)));
     const key = STORAGE_PREFIX + 'progress:' + day;
     const data = readJSON(key, {});
-    if (source) data[source] = Math.max(Number(data[source]) || 0, next);
-    const furthest = Math.max(Number(data.page) || 0, Number(data.audio) || 0, Number(data.percent) || 0);
-    if (data.percent === furthest && (!source || data[source] === next)) return;
-    data.percent = Math.round(furthest);
+    if (next <= (Number(data.page) || 0)) return;
+    data.page = next;
+    data.percent = next;
     data.updated = Date.now();
     writeJSON(key, data);
     updateCompletionUI(day);
@@ -330,15 +334,9 @@
     }
 
     if (audio) {
-      const syncAudio = function () {
-        if (Number.isFinite(audio.duration) && audio.duration > 0) {
-          updateDayProgress(day, audio.currentTime / audio.duration * 100, 'audio');
-        }
-      };
-      audio.addEventListener('loadedmetadata', syncAudio);
-      audio.addEventListener('timeupdate', syncAudio);
+      // Audio has its own independent playback progress. It can complete a
+      // portion when it reaches the end, but it does not inflate "pages read".
       audio.addEventListener('ended', function () {
-        updateDayProgress(day, 100, 'audio');
         setDayComplete(day, 'audio');
       });
     }
@@ -630,6 +628,16 @@
     updatePage(1, Number(document.getElementById('total-pages')?.textContent) || 1);
   }
 
+  function setupReaderNavigation() {
+    const active = document.querySelector('.sidebar a.active');
+    if (!active) return;
+    if (window.matchMedia && window.matchMedia('(max-width: 800px)').matches) {
+      requestAnimationFrame(function () {
+        active.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
+      });
+    }
+  }
+
   function setupFullscreen() {
     const button = document.getElementById('focus-control');
     if (!button) return;
@@ -709,11 +717,12 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=19', { updateViaCache: 'none' }).catch(function () {});
+      navigator.serviceWorker.register('./sw.js?v=20', { updateViaCache: 'none' }).catch(function () {});
     });
   }
 
   setupTheme();
+  setupReaderNavigation();
   setupAudio();
   setupCompletion();
   setupHomeDurations();
