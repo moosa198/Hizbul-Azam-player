@@ -1,12 +1,31 @@
-const VERSION = 'v16';
+const VERSION = 'v17';
 const SHELL_CACHE = 'hizbul-azam-shell-' + VERSION;
 const CONTENT_CACHE = 'hizbul-azam-content-' + VERSION;
 const SHELL = [
-  './', './index.html', './style.css?v=17', './app.js?v=18', './pdf-viewer.js?v=1', './manifest.webmanifest?v=11',
+  './', './index.html', './style.css?v=17', './completion.css?v=1', './app.js?v=18', './completion.js?v=1', './pdf-viewer.js?v=1', './manifest.webmanifest?v=11',
   './icons/hizbul-azam-favicon-32.png?v=14', './icons/hizbul-azam-icon-192.png?v=14', './icons/hizbul-azam-icon-512.png?v=14',
   './translations/saturday.json', './translations/sunday.json', './translations/monday.json', './translations/tuesday.json', './translations/wednesday.json', './translations/thursday.json', './translations/friday.json',
   './saturday.html', './sunday.html', './monday.html', './tuesday.html', './wednesday.html', './thursday.html', './friday.html'
 ];
+
+async function enhanceHtml(response) {
+  if (!response || !response.ok) return response;
+  const type = response.headers.get('content-type') || '';
+  if (!type.includes('text/html')) return response;
+
+  const html = await response.clone().text();
+  if (html.includes('completion.js?v=1')) return response;
+
+  const enhanced = html.replace(
+    '</head>',
+    '<link rel="stylesheet" href="completion.css?v=1"><script src="completion.js?v=1" defer></script></head>'
+  );
+  return new Response(enhanced, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers
+  });
+}
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -62,10 +81,14 @@ self.addEventListener('fetch', event => {
     }
 
     event.respondWith(
-      caches.match(request).then(cached => cached || fetch(request).then(response => {
-        if (response.ok) caches.open(SHELL_CACHE).then(cache => cache.put(request, response.clone()));
-        return response;
-      }).catch(() => caches.match('./index.html')))
+      caches.match(request).then(async cached => {
+        if (cached) return enhanceHtml(cached);
+        const response = await fetch(request);
+        if (response.ok) {
+          caches.open(SHELL_CACHE).then(cache => cache.put(request, response.clone()));
+        }
+        return enhanceHtml(response);
+      }).catch(() => caches.match('./index.html').then(enhanceHtml))
     );
     return;
   }
