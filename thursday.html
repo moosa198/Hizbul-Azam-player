@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f4ec">
   <title>Thursday — Hizbul-Azam</title>
-  <link rel="stylesheet" href="style.css?v=16">
+  <link rel="stylesheet" href="style.css?v=17">
   <link rel="manifest" href="manifest.webmanifest?v=10">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/hizbul-azam-favicon-32.png?v=10">
   <link rel="apple-touch-icon" href="icons/hizbul-azam-icon-192.png?v=10">
   <script>try{var t=localStorage.getItem("hizbulAzam:theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t;}catch(e){}</script>
-  <script src="app.js?v=16" defer></script>
+  <script src="app.js?v=17" defer></script>
   <script src="pdf-viewer.js" defer></script>
 </head>
 <body class="page">
@@ -37,7 +37,7 @@
           <button id="focus-control" class="reader-tool desktop-tool" type="button">Focus</button>
         </div>
       </div>
-      <div class="reading-progress" aria-hidden="true"><span id="reading-progress"></span></div>
+      <div class="reading-progress" aria-hidden="true"><span id="reading-progress"></span></div><div id="completion-status" class="completion-status" aria-live="polite"></div>
       <div class="pdf-toolbar desktop-only" id="pdf-controls" aria-label="PDF controls">
         <span class="pdf-toolbar-label">Reading view</span>
         <button type="button" class="pdf-tool" data-pdf-action="zoom-out" aria-label="Zoom out">−</button>
